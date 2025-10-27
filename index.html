@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>黄金矿工 - 重构版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .game-container {
+            position: relative;
+            width: 900px;
+            height: 650px;
+            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 35%, #8B7355 35%, #654321 100%);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 4px solid #2c3e50;
+        }
+
+        #gameCanvas {
+            display: block;
+            border-radius: 16px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-ui {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            z-index: 10;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .game-info {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .info-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-label {
+            opacity: 0.9;
+        }
+
+        .info-value {
+            font-size: 20px;
+            color: #FFD700;
+            min-width: 40px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            width: 45px;
+            height: 45px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(5px);
+        }
+
+        .control-btn:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+            border-color: rgba(255,255,255,0.5);
+        }
+
+        .control-btn:active {
+            transform: scale(0.95);
+        }
+
+        .start-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 16px;
+        }
+
+        .start-content {
+            text-align: center;
+            color: white;
+        }
+
+        .start-content h1 {
+            font-size: 48px;
+            margin-bottom: 30px;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .start-btn {
+            padding: 20px 50px;
+            font-size: 24px;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            border: none;
+            border-radius: 50px;
+            color: #2c3e50;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+        }
+
+        .game-over {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            display: none;
+            z-index: 100;
+            min-width: 300px;
+        }
+
+        .game-over h2 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            color: #FFD700;
+        }
+
+        .final-score {
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .restart-btn {
+            padding: 15px 40px;
+            font-size: 18px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .speed-control {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+            z-index: 20;
+        }
+
+        .speed-btn {
+            padding: 5px 15px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .speed-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .speed-display {
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-ui">
+            <div class="game-info">
+                <div class="info-item">
+                    <span class="info-label">分数:</span>
+                    <span class="info-value" id="score">0</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">关卡:</span>
+                    <span class="info-value" id="level">1</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">时间:</span>
+                    <span class="info-value" id="time">60</span>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="control-btn" id="soundBtn" title="音效开关">🔊</button>
+                <button class="control-btn" id="pauseBtn" title="暂停">⏸</button>
+                <button class="control-btn" id="restartBtn" title="重启">🔄</button>
+            </div>
+        </div>
+
+        <div class="start-screen" id="startScreen">
+            <div class="start-content">
+                <h1>黄金矿工</h1>
+                <button class="start-btn" onclick="startGame()">开始游戏</button>
+            </div>
+        </div>
+
+        <div class="game-over" id="gameOver">
+            <h2>游戏结束</h2>
+            <div class="final-score">最终得分: <span id="finalScore">0</span></div>
+            <button class="restart-btn" onclick="restartGame()">重新开始</button>
+        </div>
+
+        <canvas id="gameCanvas" width="900" height="650"></canvas>
+
+        <div class="speed-control">
+            <span>速度:</span>
+            <button class="speed-btn" onclick="adjustSpeed(-0.2)">减慢</button>
+            <span class="speed-display" id="speedDisplay">0.6</span>
+            <button class="speed-btn" onclick="adjustSpeed(0.2)">加快</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOver');
+        const soundBtn = document.getElementById('soundBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const restartBtn = document.getElementById('restartBtn');
+        const speedDisplay = document.getElementById('speedDisplay');
+
+        // 游戏状态
+        let gameState = 'menu'; // menu, playing, paused, gameOver
+        let score = 0;
+        let level = 1;
+        let timeLeft = 60;
+        let gameTimer = null;
+
+        // 音效系统
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        let soundEnabled = true;
+        let soundVolume = 0.5;
+
+        // 音效函数
+        function playSound(type, pitch = 1.0) {
+            if (!soundEnabled) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            switch(type) {
+                case 'extend':
+                    oscillator.frequency.setValueAtTime(200 * pitch, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(150 * pitch, audioContext.currentTime + 0.1);
+                    gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.1);
+                    break;
+
+                case 'catch':
+                    oscillator.frequency.setValueAtTime(800 * pitch, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(400 * pitch, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(soundVolume * 0.5, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                    break;
+
+                case 'score':
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
+                    gainNode.gain.setValueAtTime(soundVolume * 0.4, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+
+                case 'warning':
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.1);
+                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(soundVolume * 0.6, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                    break;
+
+                case 'gameOver':
+                    oscillator.frequency.setValueAtTime(392, audioContext.currentTime); // G4
+                    oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.2); // F4
+                    oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.4); // D4
+                    oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime + 0.6); // C4
+                    gainNode.gain.setValueAtTime(soundVolume * 0.5, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.8);
+                    break;
+
+                case 'levelUp':
+                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
+                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.15); // E5
+                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.3); // G5
+                    oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime + 0.45); // C6
+                    gainNode.gain.setValueAtTime(soundVolume * 0.4, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.6);
+                    break;
+            }
+        }
+
+        // 切换音效
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
+        }
+
+        // 暂停游戏
+        function togglePause() {
+            if (gameState === 'playing') {
+                gameState = 'paused';
+                pauseBtn.textContent = '▶️';
+                if (gameTimer) clearInterval(gameTimer);
+            } else if (gameState === 'paused') {
+                gameState = 'playing';
+                pauseBtn.textContent = '⏸';
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    updateTime();
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }, 1000);
+                gameLoop();
+            }
+        }
+
+        // 钩子配置
+        const hook = {
+            x: 450,
+            y: 100,
+            length: 50,
+            angle: 0,
+            angleSpeed: 0.6,
+            state: 'rotating', // rotating, extending, retracting
+            speed: 4,
+            retractSpeed: 6,
+            maxLength: 400,
+            baseSpeed: 4,
+            caughtItem: null
+        };
+
+        // 物品配置
+        const ITEM_TYPES = {
+            GOLD_SMALL: {
+                type: 'gold',
+                name: '小金块',
+                width: 35,
+                height: 35,
+                baseValue: 50,
+                color: '#FFD700',
+                speedMultiplier: 1.0,
+                soundPitch: 1.0
+            },
+            GOLD_MEDIUM: {
+                type: 'gold',
+                name: '中金块',
+                width: 45,
+                height: 45,
+                baseValue: 100,
+                color: '#FFA500',
+                speedMultiplier: 0.9,
+                soundPitch: 0.9
+            },
+            GOLD_LARGE: {
+                type: 'gold',
+                name: '大金块',
+                width: 60,
+                height: 60,
+                baseValue: 200,
+                color: '#FF8C00',
+                speedMultiplier: 0.7,
+                soundPitch: 0.8
+            },
+            STONE: {
+                type: 'stone',
+                name: '石头',
+                width: 50,
+                height: 50,
+                baseValue: 10,
+                color: '#808080',
+                speedMultiplier: 0.5,
+                soundPitch: 0.6
+            },
+            DIAMOND: {
+                type: 'diamond',
+                name: '钻石',
+                width: 25,
+                height: 25,
+                baseValue: 500,
+                color: '#00CED1',
+                speedMultiplier: 1.2,
+                soundPitch: 1.5
+            },
+            HUGE_GOLD: {
+                type: 'gold',
+                name: '超大金块',
+                width: 80,
+                height: 80,
+                baseValue: 300,
+                color: '#FFD700',
+                speedMultiplier: 0.4,
+                soundPitch: 0.5
+            }
+        };
+
+        // 生成物品
+        function generateItem(type, x, y) {
+            const itemTemplate = ITEM_TYPES[type];
+            if (!itemTemplate) return null;
+
+            return {
+                ...itemTemplate,
+                x: x,
+                y: y,
+                value: itemTemplate.baseValue + Math.floor(Math.random() * 20),
+                sparkle: Math.random() > 0.7
+            };
+        }
+
+        // 游戏物品数组
+        let items = [];
+
+        // 初始化关卡
+        function initLevel() {
+            items = [];
+            const itemConfigs = getItemConfigsByLevel(level);
+
+            itemConfigs.forEach(config => {
+                const item = generateItem(config.type, config.x, config.y);
+                if (item && validateItemPosition(item)) {
+                    items.push(item);
+                }
+            });
+        }
+
+        // 获取关卡配置
+        function getItemConfigsByLevel(level) {
+            const basePositions = [
+                { x: 225, y: 350 },
+                { x: 450, y: 400 },
+                { x: 675, y: 350 },
+                { x: 345, y: 420 },
+                { x: 555, y: 380 }
+            ];
+
+            let configs = [];
+
+            if (level === 1) {
+                // 第1关：展示所有物品类型
+                configs = [
+                    { type: 'GOLD_SMALL', x: 225, y: 350 },
+                    { type: 'GOLD_MEDIUM', x: 450, y: 475 },
+                    { type: 'DIAMOND', x: 675, y: 350 },
+                    { type: 'STONE', x: 345, y: 420 },
+                    { type: 'GOLD_SMALL', x: 555, y: 380 }
+                ];
+            } else if (level === 2) {
+                configs = [
+                    { type: 'GOLD_SMALL', x: 225, y: 350 },
+                    { type: 'GOLD_LARGE', x: 450, y: 400 },
+                    { type: 'STONE', x: 675, y: 320 },
+                    { type: 'GOLD_MEDIUM', x: 345, y: 380 },
+                    { type: 'DIAMOND', x: 555, y: 350 }
+                ];
+            } else if (level === 3) {
+                configs = [
+                    { type: 'GOLD_MEDIUM', x: 225, y: 350 },
+                    { type: 'HUGE_GOLD', x: 450, y: 400 },
+                    { type: 'STONE', x: 675, y: 320 },
+                    { type: 'STONE', x: 345, y: 420 },
+                    { type: 'DIAMOND', x: 555, y: 350 }
+                ];
+            } else {
+                // 第4关及以后：随机配置
+                const types = ['GOLD_SMALL', 'GOLD_MEDIUM', 'GOLD_LARGE', 'STONE', 'DIAMOND'];
+                if (level >= 5) types.push('HUGE_GOLD');
+
+                for (let i = 0; i < 5; i++) {
+                    const randomType = types[Math.floor(Math.random() * types.length)];
+                    configs.push({
+                        type: randomType,
+                        x: basePositions[i].x + (Math.random() - 0.5) * 50,
+                        y: basePositions[i].y + (Math.random() - 0.5) * 30
+                    });
+                }
+            }
+
+            return configs;
+        }
+
+        // 验证物品位置
+        function validateItemPosition(item) {
+            const dx = item.x - hook.x;
+            const dy = item.y - hook.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const maxAngle = 80 * Math.PI / 180;
+            const angle = Math.abs(Math.atan2(dx, dy));
+
+            return distance <= hook.maxLength && angle <= maxAngle;
+        }
+
+        // 绘制背景
+        function drawBackground() {
+            // 天空
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.35);
+
+            // 地面
+            ctx.fillStyle = '#8B7355';
+            ctx.fillRect(0, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
+
+            // 地面线
+            ctx.strokeStyle = '#654321';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(0, canvas.height * 0.35);
+            ctx.lineTo(canvas.width, canvas.height * 0.35);
+            ctx.stroke();
+
+            // 添加地面纹理
+            ctx.strokeStyle = 'rgba(101, 67, 33, 0.2)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 10; i++) {
+                const y = canvas.height * 0.35 + i * 30;
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        // 绘制精美钻石
+        function drawDiamond(x, y, size, sparkle) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // 钻石主体 - 多层渐变效果
+            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
+            gradient.addColorStop(0, '#FFFFFF');
+            gradient.addColorStop(0.3, '#00FFFF');
+            gradient.addColorStop(0.7, '#00CED1');
+            gradient.addColorStop(1, '#008B8B');
+
+            // 绘制八边形钻石
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            for (let i = 0; i < 8; i++) {
+                const angle = (Math.PI * 2 / 8) * i;
+                const radius = i % 2 === 0 ? size : size * 0.6;
+                const px = Math.cos(angle) * radius;
+                const py = Math.sin(angle) * radius;
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // 钻石切面效果
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(0, -size);
+            ctx.lineTo(-size * 0.6, 0);
+            ctx.lineTo(0, size);
+            ctx.lineTo(size * 0.6, 0);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 闪光效果
+            if (sparkle) {
+                const sparkleGradient = ctx.createRadialGradient(0, -size * 0.5, 0, 0, -size * 0.5, size * 0.8);
+                sparkleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
+                sparkleGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx.fillStyle = sparkleGradient;
+                ctx.beginPath();
+                ctx.arc(0, -size * 0.5, size * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 星芒效果
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+                ctx.lineWidth = 2;
+                const time = Date.now() / 1000;
+                const pulse = Math.sin(time * 3) * 0.3 + 0.7;
+
+                // 四个方向的星芒
+                for (let i = 0; i < 4; i++) {
+                    const angle = (Math.PI / 2) * i + time;
+                    ctx.beginPath();
+                    ctx.moveTo(0, 0);
+                    ctx.lineTo(Math.cos(angle) * size * 1.5 * pulse, Math.sin(angle) * size * 1.5 * pulse);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.restore();
+        }
+
+        // 绘制石头
+        function drawStone(x, y, size) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // 石头主体 - 不规则形状
+            const gradient = ctx.createRadialGradient(-size * 0.2, -size * 0.2, 0, 0, 0, size);
+            gradient.addColorStop(0, '#A9A9A9');
+            gradient.addColorStop(0.5, '#808080');
+            gradient.addColorStop(1, '#696969');
+
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+
+            // 创建不规则石头形状
+            const points = 12;
+            for (let i = 0; i < points; i++) {
+                const angle = (Math.PI * 2 / points) * i;
+                const radiusVariation = size * (0.8 + Math.sin(angle * 3) * 0.2);
+                const px = Math.cos(angle) * radiusVariation;
+                const py = Math.sin(angle) * radiusVariation;
+                if (i === 0) {
+                    ctx.moveTo(px, py);
+                } else {
+                    ctx.lineTo(px, py);
+                }
+            }
+            ctx.closePath();
+            ctx.fill();
+
+            // 石头纹理
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+            ctx.lineWidth = 1;
+
+            // 添加裂纹纹理
+            for (let i = 0; i < 5; i++) {
+                ctx.beginPath();
+                const startX = (Math.random() - 0.5) * size;
+                const startY = (Math.random() - 0.5) * size;
+                ctx.moveTo(startX, startY);
+                const endX = startX + (Math.random() - 0.5) * size * 0.8;
+                const endY = startY + (Math.random() - 0.5) * size * 0.8;
+                ctx.lineTo(endX, endY);
+                ctx.stroke();
+            }
+
+            // 高光效果
+            const highlight = ctx.createRadialGradient(-size * 0.3, -size * 0.3, 0, -size * 0.3, -size * 0.3, size * 0.4);
+            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
+            highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = highlight;
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // 绘制金块
+        function drawGoldBlock(x, y, width, height) {
+            ctx.save();
+            ctx.translate(x, y);
+
+            // 金块主体渐变
+            const gradient = ctx.createLinearGradient(-width/2, -height/2, width/2, height/2);
+            gradient.addColorStop(0, '#FFED4B');
+            gradient.addColorStop(0.3, '#FFD700');
+            gradient.addColorStop(0.7, '#FFA500');
+            gradient.addColorStop(1, '#FF8C00');
+
+            // 绘制带圆角的金块
+            const radius = Math.min(width, height) * 0.1;
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.moveTo(-width/2 + radius, -height/2);
+            ctx.lineTo(width/2 - radius, -height/2);
+            ctx.arcTo(width/2, -height/2, width/2, -height/2 + radius, radius);
+            ctx.lineTo(width/2, height/2 - radius);
+            ctx.arcTo(width/2, height/2, width/2, height/2, width/2 - radius, radius);
+            ctx.lineTo(-width/2 + radius, height/2);
+            ctx.arcTo(-width/2, height/2, -width/2, height/2 - radius, radius);
+            ctx.lineTo(-width/2, -height/2 + radius);
+            ctx.arcTo(-width/2, -height/2, -width/2, -height/2 + radius, radius);
+            ctx.closePath();
+            ctx.fill();
+
+            // 金块光泽效果
+            const shine = ctx.createLinearGradient(-width/2, -height/2, width/2, -height/2 + height * 0.6);
+            shine.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+            shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
+            ctx.fillStyle = shine;
+            ctx.fill();
+
+            // 金块边缘高光
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // 添加刻痕细节
+            ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
+            ctx.lineWidth = 0.5;
+            for (let i = 0; i < 3; i++) {
+                const lineX = -width/2 + (width / 4) * (i + 1);
+                ctx.beginPath();
+                ctx.moveTo(lineX, -height/2 + 5);
+                ctx.lineTo(lineX, height/2 - 5);
+                ctx.stroke();
+            }
+
+            ctx.restore();
+        }
+
+        // 绘制物品
+        function drawItems() {
+            items.forEach(item => {
+                if (item.type === 'diamond') {
+                    drawDiamond(item.x, item.y, item.width/2, item.sparkle);
+                } else if (item.type === 'stone') {
+                    drawStone(item.x, item.y, item.width/2);
+                } else {
+                    drawGoldBlock(item.x, item.y, item.width, item.height);
+                }
+
+                // 绘制价值标签
+                ctx.fillStyle = item.type === 'diamond' ? '#000' : '#fff';
+                ctx.font = item.type === 'HUGE_GOLD' ? 'bold 16px Arial' : 'bold 14px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+
+                // 添加背景让文字更清晰
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                const textWidth = ctx.measureText('$' + item.value).width;
+                ctx.fillRect(item.x - textWidth/2 - 4, item.y - 8, textWidth + 8, 16);
+
+                ctx.fillStyle = item.type === 'diamond' ? '#0FF' : '#FFF';
+                ctx.fillText('$' + item.value, item.x, item.y);
+            });
+        }
+
+        // 绘制钩子
+        function drawHook() {
+            // 正确的角度计算 (sin/cos方法)
+            const angleRad = hook.angle * Math.PI / 180;
+            const tipX = hook.x + Math.sin(angleRad) * hook.length;
+            const tipY = hook.y + Math.cos(angleRad) * hook.length;
+
+            // 绘制钩子线
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(hook.x, hook.y);
+            ctx.lineTo(tipX, tipY);
+            ctx.stroke();
+
+            // 绘制钩子（不使用旋转，直接计算位置）
+            ctx.strokeStyle = '#696969';
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(tipX, tipY);
+            ctx.lineTo(tipX - 10, tipY + 15);
+            ctx.lineTo(tipX + 10, tipY + 15);
+            ctx.closePath();
+            ctx.stroke();
+
+            // 如果抓到物品，绘制在钩子上
+            if (hook.caughtItem) {
+                ctx.fillStyle = hook.caughtItem.color;
+                ctx.fillRect(tipX - hook.caughtItem.width/2, tipY + 20,
+                           hook.caughtItem.width, hook.caughtItem.height);
+            }
+
+            // 绘制矿工
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(hook.x - 25, hook.y - 40, 50, 40);
+            ctx.fillStyle = '#FFB6C1';
+            ctx.beginPath();
+            ctx.arc(hook.x, hook.y - 70, 18, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 绘制安全帽
+            ctx.fillStyle = '#FFA500';
+            ctx.fillRect(hook.x - 30, hook.y - 95, 60, 15);
+        }
+
+        // 更新钩子
+        function updateHook() {
+            if (hook.state === 'rotating') {
+                hook.angle += hook.angleSpeed;
+                if (hook.angle > 80 || hook.angle < -80) {
+                    hook.angleSpeed = -hook.angleSpeed;
+                }
+            } else if (hook.state === 'extending') {
+                // 根据是否抓到物品调整速度
+                let currentSpeed = hook.speed;
+                if (hook.caughtItem) {
+                    currentSpeed *= hook.caughtItem.speedMultiplier;
+                }
+                hook.length += currentSpeed;
+                if (hook.length >= hook.maxLength) {
+                    hook.state = 'retracting';
+                }
+
+                // 检查碰撞
+                checkCollision();
+            } else if (hook.state === 'retracting') {
+                // 收回速度比延伸快，减少等待时间
+                let currentSpeed = hook.retractSpeed;
+                if (hook.caughtItem) {
+                    currentSpeed *= hook.caughtItem.speedMultiplier;
+                }
+                hook.length -= currentSpeed;
+                if (hook.length <= 50) {
+                    hook.length = 50;
+                    hook.state = 'rotating';
+
+                    // 如果抓到物品，增加分数
+                    if (hook.caughtItem) {
+                        score += hook.caughtItem.value;
+                        updateScore();
+                        playSound('score');
+                        hook.caughtItem = null;
+                    }
+                }
+            }
+        }
+
+        // 碰撞检测
+        function checkCollision() {
+            if (hook.caughtItem) return;
+
+            // 正确的角度计算 (sin/cos方法)
+            const angleRad = hook.angle * Math.PI / 180;
+            const hookTipX = hook.x + Math.sin(angleRad) * hook.length;
+            const hookTipY = hook.y + Math.cos(angleRad) * hook.length;
+
+            for (let i = 0; i < items.length; i++) {
+                const item = items[i];
+                const left = item.x - item.width/2;
+                const right = item.x + item.width/2;
+                const top = item.y - item.height/2;
+                const bottom = item.y + item.height/2;
+
+                if (hookTipX >= left && hookTipX <= right &&
+                    hookTipY >= top && hookTipY <= bottom) {
+
+                    hook.caughtItem = item;
+                    hook.state = 'retracting';
+                    items.splice(i, 1);
+                    playSound('catch', item.soundPitch || 1.0);
+                    break;
+                }
+            }
+        }
+
+        // 游戏循环
+        function gameLoop() {
+            if (gameState !== 'playing') return;
+
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 绘制背景
+            drawBackground();
+
+            // 绘制物品
+            drawItems();
+
+            // 绘制钩子
+            drawHook();
+
+            // 更新钩子
+            updateHook();
+
+            // 检查胜利条件
+            if (items.length === 0) {
+                nextLevel();
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // 调整速度
+        function adjustSpeed(delta) {
+            hook.angleSpeed = Math.max(0.2, Math.min(2.0, hook.angleSpeed + delta));
+            speedDisplay.textContent = hook.angleSpeed.toFixed(1);
+        }
+
+        // 开始游戏
+        function startGame() {
+            gameState = 'playing';
+            score = 0;
+            level = 1;
+            timeLeft = 60;
+            hook.state = 'rotating';
+            hook.length = 50;
+            hook.caughtItem = null;
+
+            // 重置钩子速度到初始值
+            hook.angleSpeed = 0.6;
+            hook.speed = hook.baseSpeed;
+            hook.retractSpeed = 6;
+
+            updateScore();
+            initLevel();
+            updateTime();
+            updateLevel();
+
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+
+            // 开始计时
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                updateTime();
+
+                // 时间警告音效（最后10秒、5秒、3秒）
+                if (timeLeft === 10 || timeLeft === 5 || timeLeft === 3) {
+                    playSound('warning');
+                }
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            gameLoop();
+        }
+
+        // 结束游戏
+        function endGame() {
+            gameState = 'gameOver';
+            if (gameTimer) clearInterval(gameTimer);
+            playSound('gameOver');
+            document.getElementById('finalScore').textContent = score;
+            gameOverScreen.style.display = 'block';
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            startGame();
+        }
+
+        // 下一关
+        function nextLevel() {
+            level++;
+            updateLevel();
+            playSound('levelUp');
+            timeLeft = Math.max(30, timeLeft - 10);
+
+            // 平衡地增加钩子速度
+            hook.speed = Math.min(6, hook.baseSpeed + (level - 1) * 0.2);
+            hook.retractSpeed = Math.min(8, 6 + (level - 1) * 0.3);
+
+            // 每5关稍微增加旋转速度
+            if (level % 5 === 0) {
+                hook.angleSpeed = Math.min(1.0, 0.6 + (level / 5) * 0.1);
+            }
+
+            initLevel();
+        }
+
+        // 更新显示
+        function updateScore() {
+            document.getElementById('score').textContent = score;
+        }
+
+        function updateTime() {
+            document.getElementById('time').textContent = timeLeft;
+        }
+
+        function updateLevel() {
+            document.getElementById('level').textContent = level;
+        }
+
+        // 点击事件
+        canvas.addEventListener('click', (e) => {
+            if (gameState === 'playing' && hook.state === 'rotating') {
+                hook.state = 'extending';
+                playSound('extend');
+            }
+        });
+
+        // 控制按钮事件
+        soundBtn.addEventListener('click', toggleSound);
+        pauseBtn.addEventListener('click', togglePause);
+        restartBtn.addEventListener('click', restartGame);
+
+        // 键盘控制
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'Escape':
+                    if (gameState === 'playing') {
+                        togglePause();
+                    }
+                    break;
+                case ' ':
+                    if (gameState === 'playing' && hook.state === 'rotating') {
+                        hook.state = 'extending';
+                        playSound('extend');
+                    }
+                    break;
+                case 'p':
+                case 'P':
+                    togglePause();
+                    break;
+            }
+        });
+
+        // 初始化
+        drawBackground();
+        drawHook();
+
+        // 初始化速度显示
+        speedDisplay.textContent = hook.angleSpeed.toFixed(1);
+    </script>
+</body>
+</html>

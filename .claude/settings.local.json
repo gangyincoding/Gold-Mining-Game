@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(xargs:*)",
+      "Bash(python:*)",
+      "Bash(curl:*)",
+      "Bash(echo:*)",
+      "Bash(__NEW_LINE__ 📁 当前项目结构：)",
+      "Bash(🎮 index.html - 主游戏文件（完整版）)",
+      "Bash(📱 simple-game.html - 简化版游戏（稳定参考）)",
+      "Bash(📖 README.md - 项目说明文档)",
+      "Bash(📄 游戏说明.md - 详细游戏机制)",
+      "Bash(📝 开发规划.md - 技术开发记录)",
+      "Bash(__NEW_LINE__ 🚀 访问地址：http://localhost:8000)",
+      "Bash(git add:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
