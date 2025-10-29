@@ -29,7 +29,9 @@
 ## 🎮 游戏截图
 
 <div align="center">
-    <img src="https://via.placeholder.com/800x500/8B7355/FFD700?text=黄金矿工+游戏界面" alt="游戏界面" width="800">
+    <img src="https://typora-picgo-save-image.oss-cn-beijing.aliyuncs.com/typora-imgs/image-20251029231409783.png?text=黄金矿工+游戏界面" alt="游戏界面" width="800">
+    <img src="https://typora-picgo-save-image.oss-cn-beijing.aliyuncs.com/typora-imgs/image-20251029231500166.png?text=黄金矿工+游戏界面" alt="游戏说明" width="800">
+    <img src="https://typora-picgo-save-image.oss-cn-beijing.aliyuncs.com/typora-imgs/image-20251029231435123.png?text=黄金矿工+游戏界面" alt="游戏界面" width="800">
     <p><em>温暖治愈的吉普力风格游戏界面</em></p>
 </div>
 
