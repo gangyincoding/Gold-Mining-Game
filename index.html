@@ -3,37 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>黄金矿工 - 重构版</title>
+    <title>黄金矿工</title>
+    <link rel="stylesheet" href="//at.alicdn.com/t/font_466379_xjvtb9r9kz.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap');
 
         body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #87CEEB 0%, #98D8E8 25%, #F0E68C 75%, #DDA15E 100%);
+            font-family: 'Quicksand', cursive;
             display: flex;
             justify-content: center;
             align-items: center;
+            min-height: 100vh;
             overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="1" stitchTiles="stitch"/><feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 0.08 0"/></filter></defs><rect width="100%" height="100%" filter="url(%23noiseFilter)"/></svg>');
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.6;
         }
 
         .game-container {
             position: relative;
             width: 900px;
             height: 650px;
-            background: linear-gradient(to bottom, #87CEEB 0%, #87CEEB 35%, #8B7355 35%, #654321 100%);
+            background: linear-gradient(135deg, #E8F5E8 0%, #F0FFF0 30%, #FFF8DC 70%, #FFE4B5 100%);
+            border-radius: 30px;
+            box-shadow:
+                0 20px 40px rgba(139, 69, 19, 0.2),
+                0 0 80px rgba(255, 228, 181, 0.3),
+                inset 0 0 40px rgba(255, 255, 255, 0.5);
+            border: 4px solid #8B7355;
+            overflow: hidden;
+            z-index: 2;
+        }
+
+        .game-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200"><defs><filter id="paperTexture"><feTurbulence type="turbulence" baseFrequency="0.04" numOctaves="5" result="turbulence"/><feColorMatrix in="turbulence" type="saturate" values="0.1"/><feComponentTransfer><feFuncA type="discrete" tableValues="0 0.1 0.1 0.2 0.1 0.3 0.2 0.4 0.3"/></feComponentTransfer></filter></defs><rect width="100%" height="100%" filter="url(%23paperTexture)" opacity="0.4"/></svg>');
+            pointer-events: none;
+        }
+
+        .game-container::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 2px dashed #D2B48C;
             border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            border: 4px solid #2c3e50;
+            opacity: 0.3;
+            pointer-events: none;
         }
 
         #gameCanvas {
             display: block;
-            border-radius: 16px;
+            border-radius: 26px;
             width: 100%;
             height: 100%;
         }
@@ -43,201 +84,532 @@
             top: 0;
             left: 0;
             right: 0;
-            padding: 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             z-index: 10;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 16px 16px 0 0;
+            background: linear-gradient(135deg, rgba(255, 248, 220, 0.9), rgba(240, 255, 240, 0.85));
+            backdrop-filter: blur(8px);
+            border-radius: 26px 26px 0 0;
+            border-bottom: 3px solid #8B7355;
         }
 
         .game-info {
-            color: white;
-            font-size: 18px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            color: #5D4037;
+            font-family: 'Quicksand', cursive;
+            font-size: 16px;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(255,255,255,0.8);
             display: flex;
-            gap: 30px;
+            gap: 20px;
             align-items: center;
         }
 
         .info-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 4px;
+            padding: 8px 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.8), rgba(255, 248, 220, 0.7));
+            border-radius: 15px;
+            border: 2px solid #D2B48C;
+            box-shadow: 0 3px 6px rgba(139, 69, 19, 0.15);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .info-item::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+            border-radius: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .info-item:hover::before {
+            opacity: 1;
+        }
+
+        .info-item:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 6px 12px rgba(139, 69, 19, 0.25);
         }
 
         .info-label {
-            opacity: 0.9;
+            font-size: 12px;
+            color: #8D6E63;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .info-value {
-            font-size: 20px;
-            color: #FFD700;
-            min-width: 40px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #FF6F00;
+            text-shadow: 1px 1px 3px rgba(255, 111, 0, 0.3);
+            min-width: 35px;
+            text-align: center;
         }
 
         .controls {
             display: flex;
-            gap: 10px;
+            gap: 12px;
         }
 
         .control-btn {
-            width: 45px;
-            height: 45px;
-            border: 2px solid rgba(255,255,255,0.3);
+            width: 48px;
+            height: 48px;
+            border: 2px solid #8B7355;
             border-radius: 50%;
-            background: rgba(255,255,255,0.1);
-            color: white;
+            background: linear-gradient(135deg, #FFF8DC, #F0E68C);
+            color: #5D4037;
             font-size: 20px;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(5px);
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(139, 69, 19, 0.2);
+            position: relative;
+        }
+
+        .control-btn::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.8), transparent);
+            border-radius: 50%;
+            opacity: 0.7;
         }
 
         .control-btn:hover {
-            background: rgba(255,255,255,0.2);
-            transform: scale(1.1);
-            border-color: rgba(255,255,255,0.5);
+            transform: translateY(-3px) scale(1.1);
+            box-shadow: 0 8px 16px rgba(139, 69, 19, 0.3);
+            background: linear-gradient(135deg, #FFE4B5, #F0E68C);
         }
 
         .control-btn:active {
-            transform: scale(0.95);
+            transform: translateY(-1px) scale(1.05);
         }
 
-        .start-screen {
+        .start-screen, .game-over {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
+            background: linear-gradient(135deg, rgba(139, 69, 19, 0.85), rgba(160, 82, 45, 0.8));
+            backdrop-filter: blur(15px);
+            border-radius: 26px;
             z-index: 100;
-            border-radius: 16px;
+            border: 4px solid #8B4513;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
         }
 
-        .start-content {
+        .start-content, .game-over-content {
             text-align: center;
-            color: white;
+            color: #FFFBF2;
+            animation: gentleFloat 2s ease-in-out infinite;
+        }
+
+        @keyframes gentleFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .title-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .title-character {
+            position: relative;
+        }
+
+        .title-hammer {
+            font-size: 48px;
+            margin-left: 5px;
+            animation: hammerSwing 2s ease-in-out infinite;
+            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+        }
+
+        @keyframes hammerSwing {
+            0%, 100% {
+                transform: rotate(0deg) translateY(0px);
+            }
+            25% {
+                transform: rotate(-15deg) translateY(-3px);
+            }
+            75% {
+                transform: rotate(15deg) translateY(-3px);
+            }
         }
 
         .start-content h1 {
-            font-size: 48px;
-            margin-bottom: 30px;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.7);
-            background: linear-gradient(45deg, #FFD700, #FFA500);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+            font-family: 'Quicksand', cursive;
+            font-size: 52px;
+            font-weight: 700;
+            margin: 0;
+            color: #FFD700;
+            text-shadow: 3px 3px 6px rgba(0,0,0,0.5);
+            letter-spacing: 2px;
+            position: relative;
         }
 
-        .start-btn {
-            padding: 20px 50px;
-            font-size: 24px;
-            background: linear-gradient(45deg, #FFD700, #FFA500);
+        
+        .game-subtitle {
+            font-size: 20px;
+            color: #FFF8DC;
+            margin-bottom: 40px;
+            font-weight: 400;
+            font-style: italic;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .help-btn {
+            padding: 14px 35px;
+            font-size: 18px;
+            font-family: 'Quicksand', cursive;
+            font-weight: 600;
+            background: linear-gradient(135deg, #90EE90, #228B22);
+            color: white;
             border: none;
             border-radius: 50px;
-            color: #2c3e50;
-            font-weight: bold;
             cursor: pointer;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(34, 139, 34, 0.3);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .start-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
-            background: linear-gradient(45deg, #FFA500, #FF8C00);
-        }
-
-        .game-over {
+        .help-btn::before {
+            content: '';
             position: absolute;
             top: 50%;
             left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.9);
-            color: white;
-            padding: 40px;
-            border-radius: 20px;
-            text-align: center;
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .help-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .help-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(34, 139, 34, 0.4);
+            background: linear-gradient(135deg, #98FB98, #228B22);
+        }
+
+        
+        /* 游戏说明弹框样式 */
+        .instructions-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
             display: none;
-            z-index: 100;
-            min-width: 300px;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(255, 248, 220, 0.95), rgba(240, 255, 240, 0.9));
+            border-radius: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            border: 3px solid #8B4513;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 2px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .modal-header h2 {
+            font-family: 'Quicksand', cursive;
+            font-size: 24px;
+            font-weight: 700;
+            color: #5D4037;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #8D6E63;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s ease;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(139, 69, 19, 0.1);
+            color: #5D4037;
+            transform: scale(1.1);
+        }
+
+        .modal-body {
+            padding: 20px 25px;
+        }
+
+        .instructions-section {
+            margin-bottom: 25px;
+        }
+
+        .instructions-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .instructions-section h3 {
+            font-family: 'Quicksand', cursive;
+            font-size: 18px;
+            font-weight: 600;
+            color: #5D4037;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .instructions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .instruction-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .instruction-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+
+        .tips-list {
+            margin: 0;
+            padding-left: 20px;
+            color: #5D4037;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .tips-list li {
+            margin-bottom: 8px;
+        }
+
+        .tips-list li strong {
+            color: #8B4513;
+            font-weight: 600;
+        }
+
+        .modal-footer {
+            padding: 15px 25px;
+            border-top: 2px solid rgba(139, 69, 19, 0.2);
+            text-align: center;
+        }
+
+        .modal-btn {
+            padding: 12px 30px;
+            font-size: 16px;
+            font-family: 'Quicksand', cursive;
+            font-weight: 600;
+            background: linear-gradient(135deg, #90EE90, #228B22);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(34, 139, 34, 0.3);
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(34, 139, 34, 0.4);
+        }
+
+        .start-btn, .restart-btn {
+            padding: 16px 45px;
+            font-size: 20px;
+            font-family: 'Quicksand', cursive;
+            font-weight: 600;
+            background: linear-gradient(135deg, #FFB74D, #FF9800);
+            color: white;
+            border: 3px solid #8B7355;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 12px rgba(139, 69, 19, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .start-btn::before, .restart-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+
+        .start-btn:hover::before, .restart-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .start-btn:hover, .restart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(139, 69, 19, 0.4);
+            background: linear-gradient(135deg, #FFA726, #FF9800);
+        }
+
+        .game-over {
+            display: none;
         }
 
         .game-over h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-            color: #FFD700;
+            font-family: 'Quicksand', cursive;
+            font-size: 40px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #FF6B6B;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
         .final-score {
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
-
-        .restart-btn {
-            padding: 15px 40px;
-            font-size: 18px;
-            background: linear-gradient(45deg, #3498db, #2980b9);
-            border: none;
-            border-radius: 25px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .restart-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            font-size: 26px;
+            margin-bottom: 35px;
+            color: #FFD700;
+            font-weight: 600;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
         }
 
         .speed-control {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            background: rgba(0,0,0,0.6);
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
+            bottom: 25px;
+            left: 25px;
+            background: linear-gradient(135deg, rgba(255, 248, 220, 0.9), rgba(240, 255, 240, 0.85));
+            color: #5D4037;
+            padding: 12px 18px;
+            border-radius: 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            backdrop-filter: blur(5px);
+            gap: 12px;
+            backdrop-filter: blur(8px);
             z-index: 20;
+            border: 2px solid #8B7355;
+            box-shadow: 0 6px 12px rgba(139, 69, 19, 0.2);
+        }
+
+        .speed-label {
+            font-family: 'Quicksand', cursive;
+            font-weight: 600;
+            font-size: 14px;
+            color: #8D6E63;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .speed-btn {
-            padding: 5px 15px;
-            background: rgba(255,255,255,0.2);
-            border: 1px solid rgba(255,255,255,0.3);
-            border-radius: 5px;
-            color: white;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #FFF8DC, #F0E68C);
+            border: 2px solid #D2B48C;
+            border-radius: 15px;
+            color: #5D4037;
             cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
+            font-size: 13px;
+            font-family: 'Quicksand', cursive;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(139, 69, 19, 0.15);
         }
 
         .speed-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: linear-gradient(135deg, #FFE4B5, #F0E68C);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(139, 69, 19, 0.25);
         }
 
         .speed-display {
-            min-width: 30px;
+            min-width: 35px;
             text-align: center;
-            font-weight: bold;
+            font-weight: 700;
+            font-family: 'Quicksand', cursive;
+            font-size: 16px;
+            color: #FF6F00;
+            text-shadow: 1px 1px 2px rgba(255, 111, 0, 0.3);
         }
     </style>
 </head>
@@ -259,32 +631,105 @@
                 </div>
             </div>
             <div class="controls">
-                <button class="control-btn" id="soundBtn" title="音效开关">🔊</button>
                 <button class="control-btn" id="pauseBtn" title="暂停">⏸</button>
                 <button class="control-btn" id="restartBtn" title="重启">🔄</button>
+                <button class="control-btn" id="soundBtn" title="音效开关">🔊</button>
             </div>
         </div>
 
         <div class="start-screen" id="startScreen">
             <div class="start-content">
-                <h1>黄金矿工</h1>
-                <button class="start-btn" onclick="startGame()">开始游戏</button>
+                <div class="title-section">
+                    <div class="title-character">
+                        <canvas id="minerCanvas" width="80" height="80"></canvas>
+                    </div>
+                    <h1>黄金矿工</h1>
+                    <div class="title-hammer">⛏️</div>
+                </div>
+                <p class="game-subtitle">挖掘财富，实现梦想</p>
+
+                <div class="button-group">
+                    <button class="start-btn" onclick="startGame()">开始游戏</button>
+                    <button class="help-btn" onclick="showInstructions()">游戏说明</button>
+                </div>
             </div>
         </div>
 
         <div class="game-over" id="gameOver">
-            <h2>游戏结束</h2>
-            <div class="final-score">最终得分: <span id="finalScore">0</span></div>
-            <button class="restart-btn" onclick="restartGame()">重新开始</button>
+            <div class="game-over-content">
+                <h2>游戏结束</h2>
+                <div class="final-score">最终得分: <span id="finalScore">0</span></div>
+                <button class="restart-btn" onclick="restartGame()">重新开始</button>
+            </div>
+        </div>
+
+        <!-- 游戏说明弹框 -->
+        <div class="instructions-modal" id="instructionsModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>🎮 游戏说明</h2>
+                    <button class="close-btn" onclick="hideInstructions()">✕</button>
+                </div>
+                <div class="modal-body">
+                    <div class="instructions-section">
+                        <h3>基础操作</h3>
+                        <div class="instructions-list">
+                            <div class="instruction-row">
+                                <span class="instruction-icon">🖱️</span>
+                                <span class="instruction-text"><strong>点击鼠标</strong> - 下放钩子</span>
+                            </div>
+                            <div class="instruction-row">
+                                <span class="instruction-icon">⌨️</span>
+                                <span class="instruction-text"><strong>空格键</strong> - 同样可以下放钩子</span>
+                            </div>
+                            <div class="instruction-row">
+                                <span class="instruction-icon">⏸️</span>
+                                <span class="instruction-text"><strong>ESC/P键</strong> - 暂停/继续游戏</span>
+                            </div>
+                            <div class="instruction-row">
+                                <span class="instruction-icon">🔄</span>
+                                <span class="instruction-text"><strong>重启按钮</strong> - 重新开始游戏</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instructions-section">
+                        <h3>进阶功能</h3>
+                        <div class="instructions-list">
+                            <div class="instruction-row">
+                                <span class="instruction-icon">⏫️</span>
+                                <span class="instruction-text"><strong>速度按钮</strong> - 调整钩子摆动速度</span>
+                            </div>
+                            <div class="instruction-row">
+                                <span class="instruction-icon">🔊</span>
+                                <span class="instruction-text"><strong>音效按钮</strong> - 开关游戏音效</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="instructions-section">
+                        <h3>💡 游戏技巧</h3>
+                        <ul class="tips-list">
+                            <li><strong>轻物品</strong>：钻石、小金块 - 收回快，价值高</li>
+                            <li><strong>重物品</strong>：大金块、石头 - 收回慢，谨慎选择</li>
+                            <li><strong>生命值</strong>：3根蜡烛，时间耗尽会失去一根</li>
+                            <li><strong>速度控制</strong>：调整摆动速度来精确瞄准</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="modal-btn" onclick="hideInstructions()">知道了</button>
+                </div>
+            </div>
         </div>
 
         <canvas id="gameCanvas" width="900" height="650"></canvas>
 
         <div class="speed-control">
-            <span>速度:</span>
-            <button class="speed-btn" onclick="adjustSpeed(-0.2)">减慢</button>
-            <span class="speed-display" id="speedDisplay">0.6</span>
-            <button class="speed-btn" onclick="adjustSpeed(0.2)">加快</button>
+            <span class="speed-label">速度</span>
+            <button class="speed-btn" onclick="adjustSpeed(-0.1)">减慢</button>
+            <span class="speed-display" id="speedDisplay">0.60</span>
+            <button class="speed-btn" onclick="adjustSpeed(0.1)">加快</button>
         </div>
     </div>
 
@@ -293,7 +738,6 @@
         const ctx = canvas.getContext('2d');
         const startScreen = document.getElementById('startScreen');
         const gameOverScreen = document.getElementById('gameOver');
-        const soundBtn = document.getElementById('soundBtn');
         const pauseBtn = document.getElementById('pauseBtn');
         const restartBtn = document.getElementById('restartBtn');
         const speedDisplay = document.getElementById('speedDisplay');
@@ -305,187 +749,775 @@
         let timeLeft = 60;
         let gameTimer = null;
 
-        // 音效系统
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        let soundEnabled = true;
-        let soundVolume = 0.5;
-
-        // 音效函数
-        function playSound(type, pitch = 1.0) {
-            if (!soundEnabled) return;
-
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-
-            switch(type) {
-                case 'extend':
-                    oscillator.frequency.setValueAtTime(200 * pitch, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(150 * pitch, audioContext.currentTime + 0.1);
-                    gainNode.gain.setValueAtTime(soundVolume * 0.3, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.1);
-                    break;
-
-                case 'catch':
-                    oscillator.frequency.setValueAtTime(800 * pitch, audioContext.currentTime);
-                    oscillator.frequency.exponentialRampToValueAtTime(400 * pitch, audioContext.currentTime + 0.2);
-                    gainNode.gain.setValueAtTime(soundVolume * 0.5, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.2);
-                    break;
-
-                case 'score':
-                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1); // E5
-                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2); // G5
-                    gainNode.gain.setValueAtTime(soundVolume * 0.4, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                    break;
-
-                case 'warning':
-                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
-                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime + 0.1);
-                    oscillator.frequency.setValueAtTime(330, audioContext.currentTime + 0.2);
-                    gainNode.gain.setValueAtTime(soundVolume * 0.6, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                    break;
-
-                case 'gameOver':
-                    oscillator.frequency.setValueAtTime(392, audioContext.currentTime); // G4
-                    oscillator.frequency.setValueAtTime(349.23, audioContext.currentTime + 0.2); // F4
-                    oscillator.frequency.setValueAtTime(293.66, audioContext.currentTime + 0.4); // D4
-                    oscillator.frequency.setValueAtTime(261.63, audioContext.currentTime + 0.6); // C4
-                    gainNode.gain.setValueAtTime(soundVolume * 0.5, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.8);
-                    break;
-
-                case 'levelUp':
-                    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime); // C5
-                    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.15); // E5
-                    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.3); // G5
-                    oscillator.frequency.setValueAtTime(1046.50, audioContext.currentTime + 0.45); // C6
-                    gainNode.gain.setValueAtTime(soundVolume * 0.4, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6);
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.6);
-                    break;
-            }
-        }
-
-        // 切换音效
-        function toggleSound() {
-            soundEnabled = !soundEnabled;
-            soundBtn.textContent = soundEnabled ? '🔊' : '🔇';
-        }
-
-        // 暂停游戏
-        function togglePause() {
-            if (gameState === 'playing') {
-                gameState = 'paused';
-                pauseBtn.textContent = '▶️';
-                if (gameTimer) clearInterval(gameTimer);
-            } else if (gameState === 'paused') {
-                gameState = 'playing';
-                pauseBtn.textContent = '⏸';
-                gameTimer = setInterval(() => {
-                    timeLeft--;
-                    updateTime();
-                    if (timeLeft <= 0) {
-                        endGame();
-                    }
-                }, 1000);
-                gameLoop();
-            }
-        }
-
-        // 钩子配置
+        // 钩子配置 - 简化版本
         const hook = {
-            x: 450,
-            y: 100,
+            x: canvas.width / 2, // 矿工位于画布中央
+            y: 200, // 调整到新矿工位置下方
             length: 50,
             angle: 0,
             angleSpeed: 0.6,
             state: 'rotating', // rotating, extending, retracting
             speed: 4,
             retractSpeed: 6,
-            maxLength: 400,
-            baseSpeed: 4,
+            maxLength: 500,
             caughtItem: null
         };
 
-        // 物品配置
+        // 矿工动画状态
+        const minerAnimation = {
+            blinkTimer: 0,
+            nextBlinkTime: Math.random() * 300 + 200,
+            isBlinking: false,
+            lookOffset: 0,
+            lookSpeed: 0.05
+        };
+
+        // 物品配置 - 简化版本
         const ITEM_TYPES = {
             GOLD_SMALL: {
                 type: 'gold',
                 name: '小金块',
                 width: 35,
                 height: 35,
-                baseValue: 50,
+                baseValue: 80,
                 color: '#FFD700',
-                speedMultiplier: 1.0,
-                soundPitch: 1.0
+                weight: 1.0, // 重量系数，影响收回速度
+                pullSpeed: 5.5, // 该物品的专用收回速度
+                icon: 'icon-coin' // 小金币图标
             },
             GOLD_MEDIUM: {
                 type: 'gold',
                 name: '中金块',
                 width: 45,
                 height: 45,
-                baseValue: 100,
+                baseValue: 150,
                 color: '#FFA500',
-                speedMultiplier: 0.9,
-                soundPitch: 0.9
+                weight: 1.8,
+                pullSpeed: 4.0,
+                icon: 'icon-gold' // 金块图标
             },
             GOLD_LARGE: {
                 type: 'gold',
                 name: '大金块',
                 width: 60,
                 height: 60,
-                baseValue: 200,
+                baseValue: 250,
                 color: '#FF8C00',
-                speedMultiplier: 0.7,
-                soundPitch: 0.8
+                weight: 2.5,
+                pullSpeed: 3.0,
+                icon: 'icon-gold' // 大金块图标
             },
             STONE: {
                 type: 'stone',
                 name: '石头',
                 width: 50,
                 height: 50,
-                baseValue: 10,
+                baseValue: 25,
                 color: '#808080',
-                speedMultiplier: 0.5,
-                soundPitch: 0.6
+                weight: 3.0,
+                pullSpeed: 2.5, // 石头很重但价值低
+                icon: 'icon-rock' // 石头图标
             },
             DIAMOND: {
                 type: 'diamond',
                 name: '钻石',
                 width: 25,
                 height: 25,
-                baseValue: 500,
+                baseValue: 600,
                 color: '#00CED1',
-                speedMultiplier: 1.2,
-                soundPitch: 1.5
+                weight: 0.3, // 钻石很轻但价值高
+                pullSpeed: 7.0,
+                icon: 'icon-diamond' // 钻石图标
             },
             HUGE_GOLD: {
                 type: 'gold',
                 name: '超大金块',
                 width: 80,
                 height: 80,
-                baseValue: 300,
+                baseValue: 400,
                 color: '#FFD700',
-                speedMultiplier: 0.4,
-                soundPitch: 0.5
+                weight: 4.0,
+                pullSpeed: 1.8, // 最重，收回最慢
+                icon: 'icon-treasure' // 宝箱图标表示超大金块
             }
         };
+
+        // 游戏物品数组
+        let items = [];
+
+        // 蜡烛生命值系统
+        class CandleSystem {
+            constructor() {
+                this.maxLives = 3;
+                this.currentLives = 3;
+                this.candles = [];
+                this.candleWidth = 30;
+                this.candleHeight = 50;
+                this.candleSpacing = 15;
+                this.startX = 25;
+                this.startY = 180; // 进一步调整到UI界面下方，避免遮挡
+
+                this.initializeCandles();
+            }
+
+            initializeCandles() {
+                this.candles = [];
+                for (let i = 0; i < this.maxLives; i++) {
+                    this.candles.push({
+                        x: this.startX + i * (this.candleWidth + this.candleSpacing),
+                        y: this.startY,
+                        isLit: i < this.currentLives
+                    });
+                }
+            }
+
+            drawCandle(candle) {
+                const { x, y, isLit } = candle;
+
+                // 绘制蜡烛主体
+                ctx.fillStyle = '#FFF8DC'; // 蜡烛颜色
+                ctx.fillRect(x, y + 15, this.candleWidth, this.candleHeight - 15);
+
+                // 绘制蜡烛底部
+                ctx.fillStyle = '#D2691E'; // 蜡烛托盘颜色
+                ctx.fillRect(x - 2, y + this.candleHeight - 8, this.candleWidth + 4, 8);
+
+                if (isLit) {
+                    // 绘制火焰
+                    this.drawFlame(x + this.candleWidth / 2, y + 10);
+
+                    // 绘制光晕效果
+                    ctx.save();
+                    ctx.globalAlpha = 0.3;
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    ctx.arc(x + this.candleWidth / 2, y + 10, 12, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                } else {
+                    // 绘制熄灭的烛芯
+                    ctx.strokeStyle = '#444';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(x + this.candleWidth / 2, y + 10);
+                    ctx.lineTo(x + this.candleWidth / 2, y + 18);
+                    ctx.stroke();
+
+                    // 绘制烟雾（可选）
+                    this.drawSmoke(x + this.candleWidth / 2, y + 5);
+                }
+            }
+
+            drawFlame(x, y) {
+                // 外焰
+                ctx.fillStyle = '#FFA500';
+                ctx.beginPath();
+                ctx.ellipse(x, y, 6, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 内焰
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.ellipse(x, y + 2, 3, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                // 火焰高光
+                ctx.fillStyle = '#FFFFE0';
+                ctx.beginPath();
+                ctx.ellipse(x - 1, y - 2, 1, 3, 0, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            drawSmoke(x, y) {
+                ctx.save();
+                ctx.strokeStyle = '#999';
+                ctx.lineWidth = 2;
+                ctx.globalAlpha = 0.5;
+
+                // 绘制波浪形烟雾
+                ctx.beginPath();
+                ctx.moveTo(x, y);
+
+                for (let i = 0; i < 15; i++) {
+                    const offsetX = Math.sin(i * 0.3 + Date.now() * 0.002) * 3;
+                    const offsetY = -i * 2;
+                    ctx.lineTo(x + offsetX, y + offsetY);
+                }
+
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            draw() {
+                this.candles.forEach(candle => this.drawCandle(candle));
+            }
+
+            loseLife() {
+                if (this.currentLives > 0) {
+                    this.currentLives--;
+                    this.updateCandles();
+                    return true;
+                }
+                return false;
+            }
+
+            updateCandles() {
+                for (let i = 0; i < this.candles.length; i++) {
+                    this.candles[i].isLit = i < this.currentLives;
+                }
+            }
+
+            reset() {
+                this.currentLives = this.maxLives;
+                this.updateCandles();
+            }
+
+            isGameOver() {
+                return this.currentLives <= 0;
+            }
+        }
+
+        // 创建全局蜡烛系统实例
+        let candleSystem = new CandleSystem();
+
+        // 音效系统
+        class SoundSystem {
+            constructor() {
+                this.audioContext = null;
+                this.enabled = true;
+                this.initAudioContext();
+            }
+
+            initAudioContext() {
+                try {
+                    window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.audioContext = new AudioContext();
+                } catch (e) {
+                    console.warn('音频上下文创建失败:', e);
+                    this.enabled = false;
+                }
+            }
+
+            // 播放音效
+            playSound(type) {
+                if (!this.enabled || !this.audioContext) return;
+
+                // 确保音频上下文处于运行状态
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+
+                switch (type) {
+                    case 'hookExtend':
+                        this.playHookExtendSound();
+                        break;
+                    case 'hookRetract':
+                        this.playHookRetractSound();
+                        break;
+                    case 'catchItem':
+                        this.playCatchItemSound();
+                        break;
+                    case 'score':
+                        this.playScoreSound();
+                        break;
+                    case 'levelComplete':
+                        this.playLevelCompleteSound();
+                        break;
+                    case 'gameOver':
+                        this.playGameOverSound();
+                        break;
+                    case 'nextLevel':
+                        this.playNextLevelSound();
+                        break;
+                    case 'background':
+                        this.playBackgroundSound();
+                        break;
+                }
+            }
+
+            // 钩子下放音效
+            playHookExtendSound() {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(800, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(400, this.audioContext.currentTime + 0.1);
+
+                gainNode.gain.setValueAtTime(0.1, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.1);
+            }
+
+            // 钩子收回音效
+            playHookRetractSound() {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(400, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(600, this.audioContext.currentTime + 0.05);
+
+                gainNode.gain.setValueAtTime(0.08, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.05);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.05);
+            }
+
+            // 抓取物品音效
+            playCatchItemSound() {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.type = 'square';
+                oscillator.frequency.setValueAtTime(1200, this.audioContext.currentTime);
+
+                gainNode.gain.setValueAtTime(0.15, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.2);
+            }
+
+            // 得分音效
+            playScoreSound() {
+                const notes = [523.25, 659.25, 783.99]; // C, E, G
+                notes.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.3);
+                    }, index * 100);
+                });
+            }
+
+            // 关卡完成音效
+            playLevelCompleteSound() {
+                const melody = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, 高C
+                melody.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.5);
+
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.5);
+                    }, index * 150);
+                });
+            }
+
+            // 游戏结束音效
+            playGameOverSound() {
+                const notes = [783.99, 659.25, 523.25, 392.00]; // G, E, C, G
+                notes.forEach((freq, index) => {
+                    setTimeout(() => {
+                        const oscillator = this.audioContext.createOscillator();
+                        const gainNode = this.audioContext.createGain();
+
+                        oscillator.connect(gainNode);
+                        gainNode.connect(this.audioContext.destination);
+
+                        oscillator.type = 'sawtooth';
+                        oscillator.frequency.setValueAtTime(freq, this.audioContext.currentTime);
+
+                        gainNode.gain.setValueAtTime(0.25, this.audioContext.currentTime);
+                        gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.8);
+
+                        oscillator.start(this.audioContext.currentTime);
+                        oscillator.stop(this.audioContext.currentTime + 0.8);
+                    }, index * 200);
+                });
+            }
+
+            // 下一关卡音效
+            playNextLevelSound() {
+                const oscillator = this.audioContext.createOscillator();
+                const gainNode = this.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(this.audioContext.destination);
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(440, this.audioContext.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(880, this.audioContext.currentTime + 0.3);
+
+                gainNode.gain.setValueAtTime(0.2, this.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
+
+                oscillator.start(this.audioContext.currentTime);
+                oscillator.stop(this.audioContext.currentTime + 0.3);
+            }
+
+            // 切换音效开关
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+
+        // 创建全局音效系统实例
+        let soundSystem = new SoundSystem();
+
+        // 小矿工角色动画
+        class TitleMiner {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.animationTime = 0;
+                this.blinkTimer = 0;
+                this.nextBlinkTime = 150;
+                this.isBlinking = false;
+                this.init();
+            }
+
+            init() {
+                this.animate();
+            }
+
+            animate() {
+                this.animationTime++;
+                this.blinkTimer++;
+
+                // 眨眼动画
+                if (this.blinkTimer >= this.nextBlinkTime) {
+                    this.isBlinking = true;
+                    this.blinkTimer = 0;
+                    this.nextBlinkTime = Math.random() * 200 + 150;
+                }
+
+                if (this.isBlinking) {
+                    if (this.blinkTimer > 10) {
+                        this.isBlinking = false;
+                    }
+                }
+
+                this.draw();
+                requestAnimationFrame(() => this.animate());
+            }
+
+            draw() {
+                this.ctx.clearRect(0, 0, 80, 80);
+
+                const centerX = 40;
+                const centerY = 40;
+
+                // 轻微的摇摆动画
+                const swayOffset = Math.sin(this.animationTime * 0.02) * 3;
+                const bounceOffset = Math.abs(Math.sin(this.animationTime * 0.03)) * 2;
+
+                // 绘制矿工身体 - 小巧可爱版
+                this.ctx.fillStyle = '#8B7355';
+                this.ctx.beginPath();
+                this.ctx.ellipse(centerX + swayOffset, centerY + bounceOffset + 15, 18, 22, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // 绘制矿工头部
+                this.ctx.fillStyle = '#FFD39B';
+                this.ctx.beginPath();
+                this.ctx.arc(centerX + swayOffset, centerY + bounceOffset - 5, 10, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // 绘制矿工帽子 - 小巧版
+                this.ctx.fillStyle = '#D2691E';
+                this.ctx.beginPath();
+                this.ctx.ellipse(centerX + swayOffset, centerY + bounceOffset - 15, 12, 8, 0, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // 帽子装饰带
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.fillRect(centerX + swayOffset - 12, centerY + bounceOffset - 18, 24, 4);
+
+                // 简化的眼睛
+                if (this.isBlinking) {
+                    // 眨眼
+                    this.ctx.strokeStyle = '#000000';
+                    this.ctx.lineWidth = 1;
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(centerX + swayOffset - 4, centerY + bounceOffset - 7);
+                    this.ctx.lineTo(centerX + swayOffset + 4, centerY + bounceOffset - 7);
+                    this.ctx.stroke();
+                } else {
+                    // 正常眼睛
+                    this.ctx.fillStyle = '#000000';
+                    this.ctx.beginPath();
+                    this.ctx.arc(centerX + swayOffset - 4, centerY + bounceOffset - 7, 1, 0, Math.PI * 2);
+                    this.ctx.arc(centerX + swayOffset + 4, centerY + bounceOffset - 7, 1, 0, Math.PI * 2);
+                    this.ctx.fill();
+                }
+
+                // 简化的微笑嘴巴
+                this.ctx.strokeStyle = '#000000';
+                this.ctx.lineWidth = 1;
+                this.ctx.beginPath();
+                this.ctx.arc(centerX + swayOffset, centerY + bounceOffset - 2, 3, 0.2 * Math.PI, 0.8 * Math.PI);
+                this.ctx.stroke();
+
+                // 小锤子 - 拿伸到矿工前方
+                const hammerAngle = Math.sin(this.animationTime * 0.05) * 0.3;
+                const hammerX = centerX + swayOffset + Math.sin(hammerAngle) * 25;
+                const hammerY = centerY + bounceOffset + 5 + Math.cos(hammerAngle) * 25;
+
+                // 锤子柄
+                this.ctx.strokeStyle = '#8B4513';
+                this.ctx.lineWidth = 3;
+                this.ctx.beginPath();
+                this.ctx.moveTo(centerX + swayOffset, centerY + bounceOffset + 5);
+                this.ctx.lineTo(hammerX, hammerY);
+                this.ctx.stroke();
+
+                // 锤子头
+                this.ctx.fillStyle = '#696969';
+                this.ctx.beginPath();
+                this.ctx.arc(hammerX, hammerY, 5, 0, Math.PI * 2);
+                this.ctx.fill();
+
+                // 闪光效果
+                const sparkleOpacity = Math.abs(Math.sin(this.animationTime * 0.1));
+                this.ctx.save();
+                this.ctx.globalAlpha = sparkleOpacity * 0.5;
+                this.ctx.fillStyle = '#FFD700';
+                this.ctx.beginPath();
+                this.ctx.arc(hammerX, hammerY - 8, 3, 0, Math.PI * 2);
+                this.ctx.fill();
+                this.ctx.restore();
+            }
+        }
+
+        // 创建小矿工角色
+        let titleMiner = null;
+
+        // 气泡字体系统
+        class SpeechBubble {
+            constructor(text, x, y) {
+                this.text = text;
+                this.x = x;
+                this.y = y;
+                this.opacity = 1;
+                this.lifetime = 90; // 1.5秒 (60fps)
+                this.floatSpeed = -0.5;
+                this.initialY = y;
+            }
+
+            update() {
+                this.y += this.floatSpeed;
+                this.lifetime--;
+                this.opacity = Math.max(0, this.lifetime / 90);
+                return this.lifetime > 0;
+            }
+
+            draw(ctx) {
+                if (this.opacity <= 0) return;
+
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+
+                // 绘制气泡背景
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+                ctx.strokeStyle = '#FFD700';
+                ctx.lineWidth = 3;
+
+                // 气泡主体
+                this.roundRect(ctx, this.x - 100, this.y - 25, 200, 50, 20);
+                ctx.fill();
+                ctx.stroke();
+
+                // 气泡小三角
+                ctx.beginPath();
+                ctx.moveTo(this.x - 10, this.y + 25);
+                ctx.lineTo(this.x + 10, this.y + 25);
+                ctx.lineTo(this.x, this.y + 35);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // 绘制文字
+                ctx.fillStyle = '#5D4037';
+                ctx.font = 'bold 18px "Quicksand", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(this.text, this.x, this.y);
+
+                ctx.restore();
+            }
+
+            roundRect(ctx, x, y, width, height, radius) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.lineTo(x + width - radius, y);
+                ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+                ctx.lineTo(x + width, y + height - radius);
+                ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                ctx.lineTo(x + radius, y + height);
+                ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+                ctx.lineTo(x, y + radius);
+                ctx.quadraticCurveTo(x, y, x + radius, y);
+                ctx.closePath();
+            }
+        }
+
+        // 游戏事件管理器
+        class GameEventManager {
+            constructor() {
+                this.speechBubbles = [];
+                this.failCount = 0;
+                this.lastFailTime = 0;
+                this.lastBubbleTime = 0;
+                this.currentExpression = 'normal';
+                this.expressionTimer = 0;
+            }
+
+            // 触发事件
+            triggerEvent(eventType, data = {}) {
+                const now = Date.now();
+
+                switch(eventType) {
+                    case 'failCatch':
+                        this.handleFailCatch(now);
+                        break;
+                    case 'successfulCatch':
+                        this.handleSuccessfulCatch(data);
+                        break;
+                    case 'timeWarning':
+                        this.handleTimeWarning(now);
+                        break;
+                    case 'levelComplete':
+                        this.handleLevelComplete();
+                        break;
+                }
+            }
+
+            handleFailCatch(now) {
+                this.failCount++;
+                this.lastFailTime = now;
+
+                // 连续失败触发表情和文字
+                if (this.failCount >= 2 && now - this.lastBubbleTime > 3000) {
+                    let message;
+                    if (this.failCount === 2) {
+                        message = "哎呀 😅";
+                        this.currentExpression = 'worried';
+                    } else if (this.failCount >= 3) {
+                        message = "再试试！💪";
+                        this.currentExpression = 'encouraging';
+                    }
+
+                    this.addSpeechBubble(message);
+                    this.expressionTimer = 90; // 1.5秒后恢复表情
+                    this.lastBubbleTime = now;
+                }
+            }
+
+            handleSuccessfulCatch(data) {
+                this.failCount = 0; // 重置失败次数
+
+                // 抓到高价值物品时的庆祝
+                if (data.value >= 200) {
+                    this.addSpeechBubble("太棒了！⭐");
+                    this.currentExpression = 'happy';
+                    this.expressionTimer = 90;
+                }
+            }
+
+            handleTimeWarning(now) {
+                // 时间警告，每5秒提醒一次
+                if (now - this.lastBubbleTime > 5000) {
+                    this.addSpeechBubble("时间不多了！⏰");
+                    this.currentExpression = 'worried';
+                    this.expressionTimer = 90;
+                    this.lastBubbleTime = now;
+                }
+            }
+
+            handleLevelComplete() {
+                this.addSpeechBubble("恭喜过关！🎉");
+                this.currentExpression = 'happy';
+                this.expressionTimer = 90;
+            }
+
+            addSpeechBubble(text) {
+                const bubble = new SpeechBubble(
+                    text,
+                    canvas.width / 2,
+                    canvas.height / 2 - 100
+                );
+                this.speechBubbles.push(bubble);
+            }
+
+            update() {
+                // 更新气泡
+                this.speechBubbles = this.speechBubbles.filter(bubble => bubble.update());
+
+                // 更新表情计时器
+                if (this.expressionTimer > 0) {
+                    this.expressionTimer--;
+                    if (this.expressionTimer === 0) {
+                        this.currentExpression = 'normal';
+                    }
+                }
+            }
+
+            draw(ctx) {
+                // 绘制所有气泡
+                this.speechBubbles.forEach(bubble => bubble.draw(ctx));
+            }
+
+            getCurrentExpression() {
+                return this.currentExpression;
+            }
+        }
+
+        // 创建游戏事件管理器
+        const gameEventManager = new GameEventManager();
+
+        // 游戏说明弹框函数
+        function showInstructions() {
+            const modal = document.getElementById('instructionsModal');
+            modal.style.display = 'flex';
+            soundSystem.playSound('levelComplete'); // 打开弹框时播放轻柔音效
+        }
+
+        function hideInstructions() {
+            const modal = document.getElementById('instructionsModal');
+            modal.style.display = 'none';
+        }
+
+        // 点击弹框背景也可以关闭
+        document.getElementById('instructionsModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                hideInstructions();
+            }
+        });
 
         // 生成物品
         function generateItem(type, x, y) {
@@ -496,13 +1528,9 @@
                 ...itemTemplate,
                 x: x,
                 y: y,
-                value: itemTemplate.baseValue + Math.floor(Math.random() * 20),
-                sparkle: Math.random() > 0.7
+                value: itemTemplate.baseValue + Math.floor(Math.random() * 20)
             };
         }
-
-        // 游戏物品数组
-        let items = [];
 
         // 初始化关卡
         function initLevel() {
@@ -517,7 +1545,6 @@
             });
         }
 
-        // 获取关卡配置
         function getItemConfigsByLevel(level) {
             const basePositions = [
                 { x: 225, y: 350 },
@@ -530,7 +1557,6 @@
             let configs = [];
 
             if (level === 1) {
-                // 第1关：展示所有物品类型
                 configs = [
                     { type: 'GOLD_SMALL', x: 225, y: 350 },
                     { type: 'GOLD_MEDIUM', x: 450, y: 475 },
@@ -556,315 +1582,610 @@
                 ];
             } else {
                 // 第4关及以后：随机配置
-                const types = ['GOLD_SMALL', 'GOLD_MEDIUM', 'GOLD_LARGE', 'STONE', 'DIAMOND'];
-                if (level >= 5) types.push('HUGE_GOLD');
-
+                const types = ['GOLD_SMALL', 'GOLD_MEDIUM', 'GOLD_LARGE', 'STONE', 'DIAMOND', 'HUGE_GOLD'];
                 for (let i = 0; i < 5; i++) {
                     const randomType = types[Math.floor(Math.random() * types.length)];
                     configs.push({
                         type: randomType,
-                        x: basePositions[i].x + (Math.random() - 0.5) * 50,
-                        y: basePositions[i].y + (Math.random() - 0.5) * 30
+                        x: basePositions[i].x + (Math.random() - 0.5) * 60,
+                        y: basePositions[i].y + (Math.random() - 0.5) * 40
                     });
                 }
             }
-
             return configs;
         }
 
-        // 验证物品位置
         function validateItemPosition(item) {
             const dx = item.x - hook.x;
             const dy = item.y - hook.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
             const maxAngle = 80 * Math.PI / 180;
             const angle = Math.abs(Math.atan2(dx, dy));
-
             return distance <= hook.maxLength && angle <= maxAngle;
         }
 
         // 绘制背景
         function drawBackground() {
-            // 天空
+            // 天空 - 扩大天空区域，让矿工显示在天空
             ctx.fillStyle = '#87CEEB';
-            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.35);
+            ctx.fillRect(0, 0, canvas.width, canvas.height * 0.4);
 
-            // 地面
+            // 绘制吉普力风格的云朵
+            drawGhibliClouds();
+
+            // 地面 - 相应缩小地面区域
             ctx.fillStyle = '#8B7355';
-            ctx.fillRect(0, canvas.height * 0.35, canvas.width, canvas.height * 0.65);
+            ctx.fillRect(0, canvas.height * 0.4, canvas.width, canvas.height * 0.6);
 
             // 地面线
             ctx.strokeStyle = '#654321';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(0, canvas.height * 0.35);
-            ctx.lineTo(canvas.width, canvas.height * 0.35);
+            ctx.moveTo(0, canvas.height * 0.4);
+            ctx.lineTo(canvas.width, canvas.height * 0.4);
             ctx.stroke();
+        }
 
-            // 添加地面纹理
-            ctx.strokeStyle = 'rgba(101, 67, 33, 0.2)';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < 10; i++) {
-                const y = canvas.height * 0.35 + i * 30;
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(canvas.width, y);
-                ctx.stroke();
+        // 绘制吉普力风格云朵
+        function drawGhibliClouds() {
+            ctx.save();
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+
+            // 云朵1 - 左上角
+            drawCloud(100, 50, 40);
+
+            // 云朵2 - 右上角
+            drawCloud(750, 80, 35);
+
+            // 云朵3 - 中间远处
+            drawCloud(450, 40, 25);
+
+            ctx.restore();
+        }
+
+        // 绘制单个云朵
+        function drawCloud(x, y, size) {
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+
+            // 云朵由多个圆形组成
+            ctx.beginPath();
+            ctx.arc(x, y, size, 0, Math.PI * 2);
+            ctx.arc(x - size * 0.8, y + size * 0.2, size * 0.7, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.8, y + size * 0.2, size * 0.7, 0, Math.PI * 2);
+            ctx.arc(x - size * 0.4, y - size * 0.3, size * 0.6, 0, Math.PI * 2);
+            ctx.arc(x + size * 0.4, y - size * 0.3, size * 0.6, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 云朵阴影
+            ctx.fillStyle = 'rgba(200, 200, 200, 0.3)';
+            ctx.beginPath();
+            ctx.arc(x, y + 5, size * 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 更新矿工动画
+        function updateMinerAnimation() {
+            minerAnimation.blinkTimer++;
+
+            // 眨睛动画
+            if (minerAnimation.blinkTimer >= minerAnimation.nextBlinkTime) {
+                minerAnimation.isBlinking = true;
+                minerAnimation.blinkTimer = 0;
+                minerAnimation.nextBlinkTime = Math.random() * 400 + 300;
+            }
+
+            if (minerAnimation.isBlinking) {
+                if (minerAnimation.blinkTimer > 10) {
+                    minerAnimation.isBlinking = false;
+                }
+            }
+
+            // 视线跟随钩子角度
+            if (hook.state === 'rotating') {
+                const targetOffset = hook.angle / 80; // 将角度转换为视线偏移
+                minerAnimation.lookOffset += (targetOffset - minerAnimation.lookOffset) * minerAnimation.lookSpeed;
             }
         }
 
-        // 绘制精美钻石
-        function drawDiamond(x, y, size, sparkle) {
-            ctx.save();
-            ctx.translate(x, y);
-
-            // 钻石主体 - 多层渐变效果
-            const gradient = ctx.createRadialGradient(0, 0, 0, 0, 0, size);
-            gradient.addColorStop(0, '#FFFFFF');
-            gradient.addColorStop(0.3, '#00FFFF');
-            gradient.addColorStop(0.7, '#00CED1');
-            gradient.addColorStop(1, '#008B8B');
-
-            // 绘制八边形钻石
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-            for (let i = 0; i < 8; i++) {
-                const angle = (Math.PI * 2 / 8) * i;
-                const radius = i % 2 === 0 ? size : size * 0.6;
-                const px = Math.cos(angle) * radius;
-                const py = Math.sin(angle) * radius;
-                if (i === 0) {
-                    ctx.moveTo(px, py);
-                } else {
-                    ctx.lineTo(px, py);
+        // 绘制矿工表情
+        function drawMinerExpression(minerX, minerY, expression) {
+            // 表情配置
+            const expressions = {
+                normal: {
+                    eyes: { type: 'normal', size: 3 },
+                    eyebrows: { type: 'normal', angle: 0 },
+                    mouth: { type: 'smile', curve: 0.8 }
+                },
+                worried: {
+                    eyes: { type: 'wide', size: 5 },
+                    eyebrows: { type: 'raised', angle: -20 },
+                    mouth: { type: 'frown', curve: -0.3 }
+                },
+                encouraging: {
+                    eyes: { type: 'determined', size: 4 },
+                    eyebrows: { type: 'focused', angle: 10 },
+                    mouth: { type: 'smile', curve: 0.6 }
+                },
+                happy: {
+                    eyes: { type: 'sparkle', size: 4 },
+                    eyebrows: { type: 'raised', angle: -15 },
+                    mouth: { type: 'big_smile', curve: 1.0 }
                 }
-            }
-            ctx.closePath();
-            ctx.fill();
+            };
 
-            // 钻石切面效果
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(0, -size);
-            ctx.lineTo(-size * 0.6, 0);
-            ctx.lineTo(0, size);
-            ctx.lineTo(size * 0.6, 0);
-            ctx.closePath();
-            ctx.stroke();
+            const config = expressions[expression] || expressions.normal;
 
-            // 闪光效果
-            if (sparkle) {
-                const sparkleGradient = ctx.createRadialGradient(0, -size * 0.5, 0, 0, -size * 0.5, size * 0.8);
-                sparkleGradient.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-                sparkleGradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-                ctx.fillStyle = sparkleGradient;
-                ctx.beginPath();
-                ctx.arc(0, -size * 0.5, size * 0.3, 0, Math.PI * 2);
-                ctx.fill();
-
-                // 星芒效果
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+            // 先检查是否在眨眼
+            if (minerAnimation.isBlinking) {
+                // 眨眼状态
+                ctx.strokeStyle = '#000000';
                 ctx.lineWidth = 2;
-                const time = Date.now() / 1000;
-                const pulse = Math.sin(time * 3) * 0.3 + 0.7;
-
-                // 四个方向的星芒
-                for (let i = 0; i < 4; i++) {
-                    const angle = (Math.PI / 2) * i + time;
-                    ctx.beginPath();
-                    ctx.moveTo(0, 0);
-                    ctx.lineTo(Math.cos(angle) * size * 1.5 * pulse, Math.sin(angle) * size * 1.5 * pulse);
-                    ctx.stroke();
-                }
-            }
-
-            ctx.restore();
-        }
-
-        // 绘制石头
-        function drawStone(x, y, size) {
-            ctx.save();
-            ctx.translate(x, y);
-
-            // 石头主体 - 不规则形状
-            const gradient = ctx.createRadialGradient(-size * 0.2, -size * 0.2, 0, 0, 0, size);
-            gradient.addColorStop(0, '#A9A9A9');
-            gradient.addColorStop(0.5, '#808080');
-            gradient.addColorStop(1, '#696969');
-
-            ctx.fillStyle = gradient;
-            ctx.beginPath();
-
-            // 创建不规则石头形状
-            const points = 12;
-            for (let i = 0; i < points; i++) {
-                const angle = (Math.PI * 2 / points) * i;
-                const radiusVariation = size * (0.8 + Math.sin(angle * 3) * 0.2);
-                const px = Math.cos(angle) * radiusVariation;
-                const py = Math.sin(angle) * radiusVariation;
-                if (i === 0) {
-                    ctx.moveTo(px, py);
-                } else {
-                    ctx.lineTo(px, py);
-                }
-            }
-            ctx.closePath();
-            ctx.fill();
-
-            // 石头纹理
-            ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-            ctx.lineWidth = 1;
-
-            // 添加裂纹纹理
-            for (let i = 0; i < 5; i++) {
                 ctx.beginPath();
-                const startX = (Math.random() - 0.5) * size;
-                const startY = (Math.random() - 0.5) * size;
-                ctx.moveTo(startX, startY);
-                const endX = startX + (Math.random() - 0.5) * size * 0.8;
-                const endY = startY + (Math.random() - 0.5) * size * 0.8;
-                ctx.lineTo(endX, endY);
+                ctx.moveTo(minerX - 8, minerY - 5);
+                ctx.lineTo(minerX + 8, minerY - 5);
                 ctx.stroke();
+            } else {
+                // 根据表情绘制眼睛
+                ctx.fillStyle = '#000000';
+                switch(config.eyes.type) {
+                    case 'wide': // 担心时的大眼睛
+                        ctx.beginPath();
+                        ctx.ellipse(minerX - 8, minerY - 5, config.eyes.size, config.eyes.size + 1, 0, 0, Math.PI * 2);
+                        ctx.ellipse(minerX + 8, minerY - 5, config.eyes.size, config.eyes.size + 1, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                    case 'sparkle': // 开心时的星星眼
+                        drawStar(minerX - 8, minerY - 5, 3);
+                        drawStar(minerX + 8, minerY - 5, 3);
+                        break;
+                    default: // 正常眼睛
+                        ctx.beginPath();
+                        ctx.arc(minerX - 8, minerY - 5, config.eyes.size, 0, Math.PI * 2);
+                        ctx.arc(minerX + 8, minerY - 5, config.eyes.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        break;
+                }
             }
 
-            // 高光效果
-            const highlight = ctx.createRadialGradient(-size * 0.3, -size * 0.3, 0, -size * 0.3, -size * 0.3, size * 0.4);
-            highlight.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
-            highlight.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = highlight;
-            ctx.fill();
+            // 绘制眉毛
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            switch(config.eyebrows.type) {
+                case 'raised': // 抬起的眉毛（担心、开心）
+                    ctx.beginPath();
+                    ctx.moveTo(minerX - 12, minerY - 15);
+                    ctx.lineTo(minerX - 4, minerY - 12);
+                    ctx.moveTo(minerX + 12, minerY - 15);
+                    ctx.lineTo(minerX + 4, minerY - 12);
+                    ctx.stroke();
+                    break;
+                case 'focused': // 专注的眉毛（鼓励）
+                    ctx.beginPath();
+                    ctx.moveTo(minerX - 12, minerY - 10);
+                    ctx.lineTo(minerX - 4, minerY - 12);
+                    ctx.moveTo(minerX + 12, minerY - 10);
+                    ctx.lineTo(minerX + 4, minerY - 12);
+                    ctx.stroke();
+                    break;
+                default: // 正常眉毛
+                    ctx.beginPath();
+                    ctx.moveTo(minerX - 12, minerY - 12);
+                    ctx.lineTo(minerX - 4, minerY - 10);
+                    ctx.moveTo(minerX + 12, minerY - 12);
+                    ctx.lineTo(minerX + 4, minerY - 10);
+                    ctx.stroke();
+                    break;
+            }
 
-            ctx.restore();
+            // 绘制嘴巴
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            switch(config.mouth.type) {
+                case 'frown': // 担心时的皱眉
+                    ctx.beginPath();
+                    ctx.arc(minerX, minerY + 15, 6, 1.2 * Math.PI, 1.8 * Math.PI);
+                    ctx.stroke();
+                    break;
+                case 'big_smile': // 开心时的大笑
+                    ctx.beginPath();
+                    ctx.arc(minerX, minerY + 8, 12, 0.1 * Math.PI, 0.9 * Math.PI);
+                    ctx.stroke();
+                    break;
+                default: // 正常微笑
+                    ctx.beginPath();
+                    ctx.arc(minerX, minerY + 8, 8, config.mouth.curve * Math.PI, (1 - config.mouth.curve) * Math.PI);
+                    ctx.stroke();
+                    break;
+            }
         }
 
-        // 绘制金块
-        function drawGoldBlock(x, y, width, height) {
-            ctx.save();
-            ctx.translate(x, y);
-
-            // 金块主体渐变
-            const gradient = ctx.createLinearGradient(-width/2, -height/2, width/2, height/2);
-            gradient.addColorStop(0, '#FFED4B');
-            gradient.addColorStop(0.3, '#FFD700');
-            gradient.addColorStop(0.7, '#FFA500');
-            gradient.addColorStop(1, '#FF8C00');
-
-            // 绘制带圆角的金块
-            const radius = Math.min(width, height) * 0.1;
-            ctx.fillStyle = gradient;
+        // 绘制小星星
+        function drawStar(x, y, size) {
+            ctx.fillStyle = '#FFD700';
             ctx.beginPath();
-            ctx.moveTo(-width/2 + radius, -height/2);
-            ctx.lineTo(width/2 - radius, -height/2);
-            ctx.arcTo(width/2, -height/2, width/2, -height/2 + radius, radius);
-            ctx.lineTo(width/2, height/2 - radius);
-            ctx.arcTo(width/2, height/2, width/2, height/2, width/2 - radius, radius);
-            ctx.lineTo(-width/2 + radius, height/2);
-            ctx.arcTo(-width/2, height/2, -width/2, height/2 - radius, radius);
-            ctx.lineTo(-width/2, -height/2 + radius);
-            ctx.arcTo(-width/2, -height/2, -width/2, -height/2 + radius, radius);
+            for (let i = 0; i < 5; i++) {
+                const angle = (i * 144 - 90) * Math.PI / 180;
+                const px = x + Math.cos(angle) * size;
+                const py = y + Math.sin(angle) * size;
+                if (i === 0) ctx.moveTo(px, py);
+                else ctx.lineTo(px, py);
+            }
             ctx.closePath();
             ctx.fill();
+        }
 
-            // 金块光泽效果
-            const shine = ctx.createLinearGradient(-width/2, -height/2, width/2, -height/2 + height * 0.6);
-            shine.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-            shine.addColorStop(1, 'rgba(255, 255, 255, 0)');
-            ctx.fillStyle = shine;
+        // 绘制矿工老人角色 - 优化版（按参数规格）
+        function drawMiner() {
+            const minerX = canvas.width / 2; // 画布顶部中央
+            const minerY = 150; // 进一步调整到UI界面下方，确保完全可见
+
+            // 更新动画
+            updateMinerAnimation();
+
+            // 绘制简单阴影
+            ctx.save();
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.beginPath();
+            ctx.ellipse(minerX, minerY + 60, 50, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+
+            // 绘制矿工身体 - 吉普力风格（宽松圆润）
+            ctx.fillStyle = '#8B7355'; // 温暖的棕色衣服
+            ctx.beginPath();
+            ctx.ellipse(minerX, minerY + 30, 55, 65, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            // 金块边缘高光
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 1;
+            // 衣服装饰
+            ctx.fillStyle = '#A0522D'; // 深棕色装饰
+            ctx.beginPath();
+            ctx.ellipse(minerX, minerY + 20, 45, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 绘制矿工头部
+            ctx.fillStyle = '#FFD39B'; // 肤色
+            ctx.beginPath();
+            ctx.arc(minerX, minerY, 25, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 绘制矿工帽子 - 吉普力风格（宽松圆顶帽）
+            ctx.fillStyle = '#D2691E'; // 温暖的巧克力色
+            ctx.beginPath();
+            ctx.ellipse(minerX, minerY - 15, 35, 25, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 帽子顶部装饰
+            ctx.fillStyle = '#F4A460'; // 浅棕色装饰
+            ctx.beginPath();
+            ctx.arc(minerX, minerY - 25, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 帽子边缘
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(minerX, minerY - 10, 38, 15, 0, 0, Math.PI * 2);
             ctx.stroke();
 
-            // 添加刻痕细节
-            ctx.strokeStyle = 'rgba(139, 69, 19, 0.3)';
-            ctx.lineWidth = 0.5;
-            for (let i = 0; i < 3; i++) {
-                const lineX = -width/2 + (width / 4) * (i + 1);
+            // 获取当前表情
+            const currentExpression = gameEventManager.getCurrentExpression();
+
+            // 绘制表情（眼睛、眉毛、嘴巴）
+            drawMinerExpression(minerX, minerY, currentExpression);
+
+            // 简化的鼻子
+            ctx.fillStyle = '#E8A87C';
+            ctx.beginPath();
+            ctx.arc(minerX, minerY, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 简化的胡须
+            ctx.strokeStyle = '#A9A9A9'; // 灰色胡须
+            ctx.lineWidth = 2;
+
+            // 左边胡须
+            ctx.beginPath();
+            ctx.moveTo(minerX - 20, minerY + 2);
+            ctx.lineTo(minerX - 30, minerY + 5);
+            ctx.stroke();
+
+            // 右边胡须
+            ctx.beginPath();
+            ctx.moveTo(minerX + 20, minerY + 2);
+            ctx.lineTo(minerX + 30, minerY + 5);
+            ctx.stroke();
+
+            // 简化的手臂和手部
+            const armAngle = hook.angle * Math.PI / 180;
+            const armLength = 20;
+            const handX = minerX + Math.sin(armAngle) * armLength;
+            const handY = minerY + 15 + Math.cos(armAngle) * armLength;
+
+            // 手臂
+            ctx.strokeStyle = '#FFD39B'; // 肤色手臂
+            ctx.lineWidth = 10;
+            ctx.beginPath();
+            ctx.moveTo(minerX, minerY + 15);
+            ctx.lineTo(handX, handY);
+            ctx.stroke();
+
+            // 手部
+            ctx.fillStyle = '#FFD39B';
+            ctx.beginPath();
+            ctx.arc(handX, handY, 8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        // 绘制钩子
+        function drawHook() {
+            // 先绘制矿工
+            drawMiner();
+
+            const angleRad = hook.angle * Math.PI / 180;
+            const tipX = hook.x + Math.sin(angleRad) * hook.length;
+            const tipY = hook.y + Math.cos(angleRad) * hook.length;
+
+            // 钩子起始位置：矿工位置下方50px处（匹配新的矿工位置）
+            const minerX = canvas.width / 2;
+            const minerY = 150;
+            const hookStartX = minerX;
+            const hookStartY = minerY + 50;
+
+            // 绘制钩子线 - 从矿工下方20px开始
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(hookStartX, hookStartY);
+            ctx.lineTo(tipX, tipY);
+            ctx.stroke();
+
+            // 绘制更真实的钩子
+            drawRealisticHook(tipX, tipY);
+
+            // 如果抓到物品，绘制物品
+            if (hook.caughtItem) {
+                drawCaughtItem(hook.caughtItem, tipX, tipY + 20);
+            }
+        }
+
+        // 绘制真实的钩子
+        function drawRealisticHook(x, y) {
+            ctx.save();
+
+            // 钩子主体 - 金属质感
+            ctx.fillStyle = '#4A4A4A';
+            ctx.strokeStyle = '#2C2C2C';
+            ctx.lineWidth = 1.5;
+
+            // 钩爪部分 - 紧凑的三爪设计
+            ctx.beginPath();
+            // 左爪
+            ctx.moveTo(x - 6, y);
+            ctx.quadraticCurveTo(x - 8, y + 4, x - 6, y + 8);
+            ctx.quadraticCurveTo(x - 5, y + 9, x - 3, y + 7);
+
+            // 右爪
+            ctx.moveTo(x + 6, y);
+            ctx.quadraticCurveTo(x + 8, y + 4, x + 6, y + 8);
+            ctx.quadraticCurveTo(x + 5, y + 9, x + 3, y + 7);
+
+            // 中爪
+            ctx.moveTo(x, y + 1);
+            ctx.quadraticCurveTo(x - 1, y + 5, x, y + 10);
+            ctx.quadraticCurveTo(x + 1, y + 5, x, y + 1);
+
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // 钩子顶部连接部分 - 缩小尺寸
+            ctx.fillStyle = '#5A5A5A';
+            ctx.beginPath();
+            ctx.arc(x, y - 3, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 金属高光效果 - 减小高光
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.beginPath();
+            ctx.arc(x - 2, y - 4, 1, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 简化的爪部高光
+            ctx.beginPath();
+            ctx.ellipse(x - 4, y + 2, 0.8, 1.5, -Math.PI/4, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.ellipse(x + 4, y + 2, 0.8, 1.5, Math.PI/4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 钩尖部分 - 更小更精细
+            ctx.fillStyle = '#3A3A3A';
+            ctx.beginPath();
+            // 左钩尖
+            ctx.moveTo(x - 6, y + 8);
+            ctx.lineTo(x - 5, y + 12);
+            ctx.lineTo(x - 3, y + 7);
+            ctx.closePath();
+            ctx.fill();
+
+            // 右钩尖
+            ctx.moveTo(x + 6, y + 8);
+            ctx.lineTo(x + 5, y + 12);
+            ctx.lineTo(x + 3, y + 7);
+            ctx.closePath();
+            ctx.fill();
+
+            // 中钩尖
+            ctx.moveTo(x, y + 10);
+            ctx.lineTo(x, y + 14);
+            ctx.lineTo(x + 1, y + 11);
+            ctx.lineTo(x - 1, y + 11);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.restore();
+        }
+
+        // 绘制被抓取的物品
+        function drawCaughtItem(item, x, y) {
+            // 绘制物品背景形状
+            ctx.fillStyle = item.color;
+
+            if (item.type === 'diamond') {
+                // 钻石 - 简单的菱形背景
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(Math.PI / 4);
+                ctx.fillRect(-item.width/2, -item.height/2, item.width, item.height);
+                ctx.restore();
+            } else if (item.type === 'stone') {
+                // 石头 - 圆形背景
                 ctx.beginPath();
-                ctx.moveTo(lineX, -height/2 + 5);
-                ctx.lineTo(lineX, height/2 - 5);
-                ctx.stroke();
+                ctx.arc(x, y, item.width/2, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // 金块 - 矩形背景
+                ctx.fillRect(x - item.width/2, y - item.height/2,
+                           item.width, item.height);
             }
 
+            // 绘制IconFont图标
+            drawCaughtItemIcon(item, x, y);
+
+            // 价值标签 - 抓取时可以小一些
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('$' + item.value, x, y - item.height/2 - 3);
+
+            // 重量指示器 - 抓取时可以小一些
+            const weightColor = getWeightColor(item.weight);
+            ctx.fillStyle = weightColor;
+            ctx.font = '8px Arial';
+            ctx.fillText(getWeightText(item.weight), x, y + item.height/2 + 8);
+        }
+
+        // 绘制被抓取物品的图标
+        function drawCaughtItemIcon(item, x, y) {
+            const iconSize = Math.min(item.width, item.height) * 0.5; // 抓取时图标稍小
+            ctx.save();
+            ctx.font = `${iconSize}px iconfont`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // 图标颜色
+            const iconColor = getIconColor(item.color);
+            ctx.fillStyle = iconColor;
+
+            // 绘制图标
+            ctx.fillText(getIconChar(item.icon), x, y);
             ctx.restore();
         }
 
         // 绘制物品
         function drawItems() {
             items.forEach(item => {
+                // 绘制物品背景形状
+                ctx.fillStyle = item.color;
+
                 if (item.type === 'diamond') {
-                    drawDiamond(item.x, item.y, item.width/2, item.sparkle);
+                    // 钻石 - 简单的菱形背景
+                    ctx.save();
+                    ctx.translate(item.x, item.y);
+                    ctx.rotate(Math.PI / 4);
+                    ctx.fillRect(-item.width/2, -item.height/2, item.width, item.height);
+                    ctx.restore();
                 } else if (item.type === 'stone') {
-                    drawStone(item.x, item.y, item.width/2);
+                    // 石头 - 圆形背景
+                    ctx.beginPath();
+                    ctx.arc(item.x, item.y, item.width/2, 0, Math.PI * 2);
+                    ctx.fill();
                 } else {
-                    drawGoldBlock(item.x, item.y, item.width, item.height);
+                    // 金块 - 矩形背景
+                    ctx.fillRect(item.x - item.width/2, item.y - item.height/2,
+                               item.width, item.height);
                 }
 
-                // 绘制价值标签
-                ctx.fillStyle = item.type === 'diamond' ? '#000' : '#fff';
-                ctx.font = item.type === 'HUGE_GOLD' ? 'bold 16px Arial' : 'bold 14px Arial';
+                // 绘制IconFont图标
+                drawItemIcon(item);
+
+                // 价值标签
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 12px Arial';
                 ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
+                ctx.fillText('$' + item.value, item.x, item.y - item.height/2 - 5);
 
-                // 添加背景让文字更清晰
-                ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                const textWidth = ctx.measureText('$' + item.value).width;
-                ctx.fillRect(item.x - textWidth/2 - 4, item.y - 8, textWidth + 8, 16);
-
-                ctx.fillStyle = item.type === 'diamond' ? '#0FF' : '#FFF';
-                ctx.fillText('$' + item.value, item.x, item.y);
+                // 重量指示器 - 用颜色和文字表示
+                const weightColor = getWeightColor(item.weight);
+                ctx.fillStyle = weightColor;
+                ctx.font = '9px Arial';
+                ctx.fillText(getWeightText(item.weight), item.x, item.y + item.height/2 + 12);
             });
         }
 
-        // 绘制钩子
-        function drawHook() {
-            // 正确的角度计算 (sin/cos方法)
-            const angleRad = hook.angle * Math.PI / 180;
-            const tipX = hook.x + Math.sin(angleRad) * hook.length;
-            const tipY = hook.y + Math.cos(angleRad) * hook.length;
+        // 绘制物品图标
+        function drawItemIcon(item) {
+            const iconSize = Math.min(item.width, item.height) * 0.6;
+            ctx.save();
+            ctx.font = `${iconSize}px iconfont`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
 
-            // 绘制钩子线
-            ctx.strokeStyle = '#8B4513';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(hook.x, hook.y);
-            ctx.lineTo(tipX, tipY);
-            ctx.stroke();
+            // 图标颜色 - 使用白色或深色以确保对比度
+            const iconColor = getIconColor(item.color);
+            ctx.fillStyle = iconColor;
 
-            // 绘制钩子（不使用旋转，直接计算位置）
-            ctx.strokeStyle = '#696969';
-            ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(tipX, tipY);
-            ctx.lineTo(tipX - 10, tipY + 15);
-            ctx.lineTo(tipX + 10, tipY + 15);
-            ctx.closePath();
-            ctx.stroke();
-
-            // 如果抓到物品，绘制在钩子上
-            if (hook.caughtItem) {
-                ctx.fillStyle = hook.caughtItem.color;
-                ctx.fillRect(tipX - hook.caughtItem.width/2, tipY + 20,
-                           hook.caughtItem.width, hook.caughtItem.height);
-            }
-
-            // 绘制矿工
-            ctx.fillStyle = '#8B4513';
-            ctx.fillRect(hook.x - 25, hook.y - 40, 50, 40);
-            ctx.fillStyle = '#FFB6C1';
-            ctx.beginPath();
-            ctx.arc(hook.x, hook.y - 70, 18, 0, Math.PI * 2);
-            ctx.fill();
-
-            // 绘制安全帽
-            ctx.fillStyle = '#FFA500';
-            ctx.fillRect(hook.x - 30, hook.y - 95, 60, 15);
+            // 绘制图标
+            ctx.fillText(getIconChar(item.icon), item.x, item.y);
+            ctx.restore();
         }
 
-        // 更新钩子
+        // 获取图标字符
+        function getIconChar(iconName) {
+            const iconMap = {
+                'icon-coin': '💰', // 使用emoji替代，确保显示
+                'icon-gold': '🏆',
+                'icon-rock': '🪨',
+                'icon-diamond': '💎',
+                'icon-treasure': '📦'
+            };
+            return iconMap[iconName] || '📦';
+        }
+
+        // 获取图标颜色
+        function getIconColor(bgColor) {
+            // 根据背景颜色亮度选择合适的图标颜色
+            const colors = {
+                '#FFD700': '#8B4513', // 金色背景用深棕色图标
+                '#FFA500': '#8B4513', // 橙色背景用深棕色图标
+                '#FF8C00': '#8B4513', // 深橙色背景用深棕色图标
+                '#808080': '#FFFFFF', // 灰色背景用白色图标
+                '#00CED1': '#FFFFFF'  // 青色背景用白色图标
+            };
+            return colors[bgColor] || '#FFFFFF';
+        }
+
+        // 根据重量获取颜色
+        function getWeightColor(weight) {
+            if (weight <= 0.5) return '#00FF00'; // 绿色 - 很轻
+            if (weight <= 1.0) return '#90EE90'; // 浅绿 - 轻
+            if (weight <= 2.0) return '#FFD700'; // 黄色 - 中等
+            if (weight <= 3.0) return '#FFA500'; // 橙色 - 重
+            return '#FF6347'; // 红色 - 很重
+        }
+
+        // 根据重量获取文字
+        function getWeightText(weight) {
+            if (weight <= 0.5) return '超轻';
+            if (weight <= 1.0) return '轻';
+            if (weight <= 2.0) return '中等';
+            if (weight <= 3.0) return '重';
+            return '超重';
+        }
+
+        // 更新钩子 - 基于测试版本的有效逻辑
         function updateHook() {
             if (hook.state === 'rotating') {
                 hook.angle += hook.angleSpeed;
@@ -872,25 +2193,30 @@
                     hook.angleSpeed = -hook.angleSpeed;
                 }
             } else if (hook.state === 'extending') {
-                // 根据是否抓到物品调整速度
-                let currentSpeed = hook.speed;
-                if (hook.caughtItem) {
-                    currentSpeed *= hook.caughtItem.speedMultiplier;
-                }
-                hook.length += currentSpeed;
+                // 简单的延伸逻辑
+                hook.length += hook.speed;
+
+                // 如果达到最大长度，开始收回
                 if (hook.length >= hook.maxLength) {
+                    soundSystem.playSound('hookRetract');
                     hook.state = 'retracting';
                 }
 
                 // 检查碰撞
                 checkCollision();
             } else if (hook.state === 'retracting') {
-                // 收回速度比延伸快，减少等待时间
-                let currentSpeed = hook.retractSpeed;
+                // 根据物品重量调整收回速度
+                let currentSpeed;
                 if (hook.caughtItem) {
-                    currentSpeed *= hook.caughtItem.speedMultiplier;
+                    // 使用物品的专用收回速度
+                    currentSpeed = hook.caughtItem.pullSpeed;
+                } else {
+                    // 空钩子使用默认收回速度
+                    currentSpeed = hook.retractSpeed;
                 }
                 hook.length -= currentSpeed;
+
+                // 如果回到顶部，重置状态
                 if (hook.length <= 50) {
                     hook.length = 50;
                     hook.state = 'rotating';
@@ -899,14 +2225,17 @@
                     if (hook.caughtItem) {
                         score += hook.caughtItem.value;
                         updateScore();
-                        playSound('score');
+                        soundSystem.playSound('score'); // 得分音效
                         hook.caughtItem = null;
+                    } else {
+                        // 没抓到物品，触发失败事件
+                        gameEventManager.triggerEvent('failCatch');
                     }
                 }
             }
         }
 
-        // 碰撞检测
+        // 碰撞检测 - 简化版本
         function checkCollision() {
             if (hook.caughtItem) return;
 
@@ -925,16 +2254,25 @@
                 if (hookTipX >= left && hookTipX <= right &&
                     hookTipY >= top && hookTipY <= bottom) {
 
+                    // 设置抓取的物品
                     hook.caughtItem = item;
                     hook.state = 'retracting';
+
+                    // 播放抓取音效
+                    soundSystem.playSound('catchItem');
+
+                    // 触发成功抓取事件
+                    gameEventManager.triggerEvent('successfulCatch', { value: item.value, type: item.type });
+
+                    // 从items数组中移除，避免重复碰撞
                     items.splice(i, 1);
-                    playSound('catch', item.soundPitch || 1.0);
+
                     break;
                 }
             }
         }
 
-        // 游戏循环
+        // 游戏循环 - 简化版本
         function gameLoop() {
             if (gameState !== 'playing') return;
 
@@ -943,6 +2281,9 @@
 
             // 绘制背景
             drawBackground();
+
+            // 绘制蜡烛生命值系统
+            candleSystem.draw();
 
             // 绘制物品
             drawItems();
@@ -953,22 +2294,78 @@
             // 更新钩子
             updateHook();
 
+            // 更新和绘制游戏事件系统
+            gameEventManager.update();
+            gameEventManager.draw(ctx);
+
+            // 时间警告检测
+            if (timeLeft <= 10 && timeLeft > 0) {
+                gameEventManager.triggerEvent('timeWarning');
+            }
+
             // 检查胜利条件
             if (items.length === 0) {
+                gameEventManager.triggerEvent('levelComplete');
+                soundSystem.playSound('levelComplete'); // 关卡完成音效
                 nextLevel();
             }
 
-            requestAnimationFrame(gameLoop);
+            window.animationFrameId = requestAnimationFrame(gameLoop);
         }
 
         // 调整速度
         function adjustSpeed(delta) {
-            hook.angleSpeed = Math.max(0.2, Math.min(2.0, hook.angleSpeed + delta));
-            speedDisplay.textContent = hook.angleSpeed.toFixed(1);
+            const newSpeed = hook.angleSpeed + delta;
+            const minSpeed = 0.2;
+            const maxSpeed = 2.0;
+
+            // 速度范围：0.2 - 2.0
+            if (newSpeed >= minSpeed && newSpeed <= maxSpeed) {
+                hook.angleSpeed = newSpeed;
+                updateSpeedDisplay();
+                updateSpeedButtons();
+            }
+        }
+
+        // 更新速度显示
+        function updateSpeedDisplay() {
+            speedDisplay.textContent = hook.angleSpeed.toFixed(2);
+            updateSpeedButtons();
+
+            // 调试信息：在控制台输出实际速度
+            console.log('钩子速度更新为:', hook.angleSpeed);
+        }
+
+        // 更新速度按钮状态
+        function updateSpeedButtons() {
+            const minSpeed = 0.2;
+            const maxSpeed = 2.0;
+            const buttons = document.querySelectorAll('.speed-btn');
+
+            // 减慢按钮
+            if (hook.angleSpeed <= minSpeed) {
+                buttons[0].style.opacity = '0.5';
+                buttons[0].style.cursor = 'not-allowed';
+            } else {
+                buttons[0].style.opacity = '1';
+                buttons[0].style.cursor = 'pointer';
+            }
+
+            // 加快按钮
+            if (hook.angleSpeed >= maxSpeed) {
+                buttons[1].style.opacity = '0.5';
+                buttons[1].style.cursor = 'not-allowed';
+            } else {
+                buttons[1].style.opacity = '1';
+                buttons[1].style.cursor = 'pointer';
+            }
         }
 
         // 开始游戏
         function startGame() {
+            // 先清理之前的游戏状态
+            cleanupGame();
+
             gameState = 'playing';
             score = 0;
             level = 1;
@@ -979,64 +2376,145 @@
 
             // 重置钩子速度到初始值
             hook.angleSpeed = 0.6;
-            hook.speed = hook.baseSpeed;
+            hook.speed = 4;
             hook.retractSpeed = 6;
+
+            // 重置蜡烛生命值系统
+            candleSystem.reset();
+
+            // 重置游戏事件管理器
+            gameEventManager.failCount = 0;
+            gameEventManager.currentExpression = 'normal';
+            gameEventManager.expressionTimer = 0;
+            gameEventManager.speechBubbles = [];
 
             updateScore();
             initLevel();
             updateTime();
             updateLevel();
+            updateSpeedDisplay();
+            updateSpeedButtons(); // 确保按钮状态正确
 
             startScreen.style.display = 'none';
             gameOverScreen.style.display = 'none';
 
             // 开始计时
-            if (gameTimer) clearInterval(gameTimer);
             gameTimer = setInterval(() => {
                 timeLeft--;
                 updateTime();
 
-                // 时间警告音效（最后10秒、5秒、3秒）
-                if (timeLeft === 10 || timeLeft === 5 || timeLeft === 3) {
-                    playSound('warning');
-                }
-
                 if (timeLeft <= 0) {
-                    endGame();
+                    // 时间耗尽，失去一根蜡烛生命
+                    if (candleSystem.loseLife()) {
+                        // 如果还有生命值，重置关卡继续游戏
+                        if (!candleSystem.isGameOver()) {
+                            // 重置当前关卡
+                            timeLeft = 60;
+                            initLevel();
+                            hook.state = 'rotating';
+                            hook.length = 50;
+                            hook.caughtItem = null;
+                        } else {
+                            // 如果生命值耗尽，游戏结束
+                            endGame();
+                        }
+                    } else {
+                        // 如果无法失去生命值，游戏结束
+                        endGame();
+                    }
                 }
             }, 1000);
 
             gameLoop();
         }
 
+        // 暂停游戏
+        function togglePause() {
+            if (gameState === 'playing') {
+                gameState = 'paused';
+                pauseBtn.textContent = '▶️';
+                if (gameTimer) clearInterval(gameTimer);
+            } else if (gameState === 'paused') {
+                gameState = 'playing';
+                pauseBtn.textContent = '⏸';
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    updateTime();
+                    if (timeLeft <= 0) {
+                        endGame();
+                    }
+                }, 1000);
+                gameLoop();
+            }
+        }
+
         // 结束游戏
         function endGame() {
             gameState = 'gameOver';
-            if (gameTimer) clearInterval(gameTimer);
-            playSound('gameOver');
+            cleanupGame(); // 使用统一的清理函数
+            soundSystem.playSound('gameOver'); // 游戏结束音效
             document.getElementById('finalScore').textContent = score;
             gameOverScreen.style.display = 'block';
         }
 
         // 重新开始游戏
         function restartGame() {
+            // 先清理所有定时器和状态
+            cleanupGame();
+
+            // 然后重新开始
             startGame();
+        }
+
+        // 清理游戏状态
+        function cleanupGame() {
+            // 清理游戏计时器
+            if (gameTimer) {
+                clearInterval(gameTimer);
+                gameTimer = null;
+            }
+
+            // 停止游戏循环
+            gameState = 'menu';
+
+            // 重置钩子状态 - 包括速度
+            hook.state = 'rotating';
+            hook.length = 50;
+            hook.caughtItem = null;
+            hook.angle = 0;
+            hook.angleSpeed = 0.6; // 重置到初始速度
+            hook.speed = 4; // 重置延伸速度
+            hook.retractSpeed = 6; // 重置收回速度
+
+            // 清除任何可能的动画帧请求
+            if (window.animationFrameId) {
+                cancelAnimationFrame(window.animationFrameId);
+                window.animationFrameId = null;
+            }
         }
 
         // 下一关
         function nextLevel() {
             level++;
             updateLevel();
-            playSound('levelUp');
-            timeLeft = Math.max(30, timeLeft - 10);
+            soundSystem.playSound('nextLevel'); // 下一关卡音效
+
+            // 更灵活的时间调整策略
+            if (level <= 3) {
+                timeLeft = Math.max(50, timeLeft - 5);
+            } else if (level <= 6) {
+                timeLeft = Math.max(45, timeLeft - 8);
+            } else {
+                timeLeft = Math.max(35, timeLeft - 10);
+            }
 
             // 平衡地增加钩子速度
-            hook.speed = Math.min(6, hook.baseSpeed + (level - 1) * 0.2);
-            hook.retractSpeed = Math.min(8, 6 + (level - 1) * 0.3);
+            hook.speed = Math.min(6.5, 4 + (level - 1) * 0.15);
+            hook.retractSpeed = Math.min(9, 6 + (level - 1) * 0.25);
 
-            // 每5关稍微增加旋转速度
-            if (level % 5 === 0) {
-                hook.angleSpeed = Math.min(1.0, 0.6 + (level / 5) * 0.1);
+            // 每4关稍微增加旋转速度
+            if (level % 4 === 0) {
+                hook.angleSpeed = Math.min(1.2, 0.6 + (level / 4) * 0.08);
             }
 
             initLevel();
@@ -1056,17 +2534,24 @@
         }
 
         // 点击事件
-        canvas.addEventListener('click', (e) => {
+        canvas.addEventListener('click', () => {
             if (gameState === 'playing' && hook.state === 'rotating') {
                 hook.state = 'extending';
-                playSound('extend');
+                soundSystem.playSound('hookExtend'); // 下放钩子音效
             }
         });
 
         // 控制按钮事件
-        soundBtn.addEventListener('click', toggleSound);
         pauseBtn.addEventListener('click', togglePause);
         restartBtn.addEventListener('click', restartGame);
+
+        // 音效按钮事件
+        const soundBtn = document.getElementById('soundBtn');
+        soundBtn.addEventListener('click', () => {
+            const enabled = soundSystem.toggle();
+            soundBtn.textContent = enabled ? '🔊' : '🔇';
+            soundBtn.title = enabled ? '音效开关' : '音效已关闭';
+        });
 
         // 键盘控制
         document.addEventListener('keydown', (e) => {
@@ -1079,7 +2564,7 @@
                 case ' ':
                     if (gameState === 'playing' && hook.state === 'rotating') {
                         hook.state = 'extending';
-                        playSound('extend');
+                        soundSystem.playSound('hookExtend'); // 空格键下放钩子音效
                     }
                     break;
                 case 'p':
@@ -1091,10 +2576,13 @@
 
         // 初始化
         drawBackground();
+        candleSystem.draw();
         drawHook();
+        updateSpeedDisplay();
+        updateSpeedButtons(); // 确保按钮状态也正确初始化
 
-        // 初始化速度显示
-        speedDisplay.textContent = hook.angleSpeed.toFixed(1);
+        // 初始化标题小矿工角色
+        titleMiner = new TitleMiner('minerCanvas');
     </script>
 </body>
 </html>
