@@ -44,7 +44,7 @@
 
 1. **克隆项目**
    ```bash
-   git clone https://github.com/yourusername/gold-miner-game.git
+   git clone https://github.com/gangyincoding/gold-miner-game.git
    cd gold-miner-game
    ```
 
@@ -296,7 +296,7 @@ gold-miner-game/
 欢迎对本项目做出贡献！请遵循以下步骤：
 
 ### 🐛 报告问题
-- 使用 [Issues](https://github.com/yourusername/gold-miner-game/issues) 报告bug
+- 使用 [Issues](https://github.com/gangyincoding/gold-miner-game/issues) 报告bug
 - 提供详细的复现步骤和环境信息
 - 包含截图或错误信息
 
@@ -331,9 +331,9 @@ gold-miner-game/
 
 ## 📞 联系方式
 
-- **项目主页**：[GitHub Repository](https://github.com/yourusername/gold-miner-game)
+- **项目主页**：[GitHub Repository](https://github.com/gangyincoding/gold-miner-game)
 - **在线演示**：[Live Demo](http://localhost:8000)
-- **问题反馈**：[Issues](https://github.com/yourusername/gold-miner-game/issues)
+- **问题反馈**：[Issues](https://github.com/gangyincoding/gold-miner-game/issues)
 
 ---
 

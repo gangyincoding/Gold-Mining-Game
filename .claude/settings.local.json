@@ -13,7 +13,9 @@
       "Bash(📄 游戏说明.md - 详细游戏机制)",
       "Bash(📝 开发规划.md - 技术开发记录)",
       "Bash(__NEW_LINE__ 🚀 访问地址：http://localhost:8000)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "WebFetch(domain:typora-picgo-save-image.oss-cn-beijing.aliyuncs.com)"
     ],
     "deny": [],
     "ask": []
