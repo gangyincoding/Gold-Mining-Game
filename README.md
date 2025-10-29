@@ -227,15 +227,25 @@ if (eventType === 'failCatch' &&
 
 ```
 gold-miner-game/
-├── 📄 index.html              # 主游戏文件（2600+行）
-├── 📄 simple-game.html        # 简化版游戏（参考版本）
-├── 📄 README.md               # 项目说明文档
-├── 📄 游戏说明.md             # 详细游戏机制
-├── 📄 开发规划.md             # 开发记录
-├── 📁 .claude/                # 开发配置
-│   └── settings.local.json
-└── 🐍 server.py              # 本地服务器脚本
+├── 📄 index.html              # 主游戏文件（2600+行完整实现）
+├── 📄 README.md               # 专业项目文档（340+行详细说明）
+├── 📁 .claude/                # 开发工具配置
+│   └── settings.local.json    # 本地开发设置
+└── 📁 .git/                   # 版本控制目录
 ```
+
+**🎯 核心文件说明：**
+
+- **`index.html`** (91KB) - 完整的单文件游戏实现
+  - HTML5 Canvas 游戏引擎
+  - 完整的游戏逻辑和物理系统
+  - 情感化交互和音效系统
+  - 吉普力风格UI设计
+
+- **`README.md`** (12KB) - 专业项目文档
+  - 详细的游戏介绍和玩法说明
+  - 完整的技术架构文档
+  - 开发和部署指南
 
 ## 🧪 开发调试
 
